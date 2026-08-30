@@ -338,6 +338,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 
   <!-- 资料库 -->
   <div class="admin-page" id="ap-library">
+    <div class="card" style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border-color:#C7D2FE">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:12px;font-weight:700;color:#3730A3">出题流程:</span>
+        <span style="font-size:12px;background:#fff;border:1.5px solid #C7D2FE;border-radius:999px;padding:6px 14px;cursor:pointer" onclick="switchAdminTab('library')">1️⃣ 上传 PDF 资料</span>
+        <span style="color:#A5B4FC">→</span>
+        <span style="font-size:12px;background:#fff;border:1.5px solid #C7D2FE;border-radius:999px;padding:6px 14px;cursor:pointer" onclick="switchAdminTab('parse')">2️⃣ 解析校对 / 粘贴快速出题</span>
+        <span style="color:#A5B4FC">→</span>
+        <span style="font-size:12px;background:#fff;border:1.5px solid #C7D2FE;border-radius:999px;padding:6px 14px;cursor:pointer" onclick="switchAdminTab('published')">3️⃣ 投放学生端</span>
+        <span style="font-size:11px;color:#6366F1;margin-left:auto">💡 题目校对一半也能放心关页面,草稿会自动保存</span>
+      </div>
+    </div>
     <div class="card">
       <div class="card-h">
         <h2>上传新资料</h2>
@@ -371,6 +382,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
         <button class="btn" onclick="parseSelected()">⚙ 开始解析</button>
         <span class="h-sub" id="parseHint" style="margin-left:auto"></span>
       </div>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <h2>⚡ 快速出题（粘贴文本）</h2>
+        <span class="h-sub">不用 PDF,直接粘贴文字批量生成题目</span>
+      </div>
+      <details style="padding:0 2px">
+        <summary style="cursor:pointer;font-size:13px;color:var(--indigo);font-weight:600;user-select:none">展开输入框 ▾</summary>
+        <div style="margin-top:12px">
+          <div style="background:#F0F4FF;border:1px solid #C7D2FE;border-radius:10px;padding:10px 14px;font-size:11.5px;color:#3730A3;line-height:1.8;margin-bottom:10px">
+            📋 支持格式(每题之间<b>空一行</b>):<br>
+            题干文字...<br>
+            A. 选项一　B. 选项二　C. 选项三　D. 选项四<br>
+            答案:B<br>
+            解析:可选,写了解析学生端就能看到
+          </div>
+          <textarea id="quickText" placeholder="在这里粘贴题目,一题写完后空一行再写下一题..." style="width:100%;min-height:160px;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-size:13px;font-family:inherit;box-sizing:border-box"></textarea>
+          <div style="display:flex;gap:10px;margin-top:10px;align-items:center">
+            <button class="btn" onclick="quickAddQuestions()">⚡ 生成题目草稿</button>
+            <span class="h-sub" id="quickHint"></span>
+          </div>
+        </div>
+      </details>
     </div>
     <div class="card" id="parseResultCard" style="display:none">
       <div class="card-h">
@@ -553,7 +587,9 @@ const SUBJECTS = [
 const $ = id => document.getElementById(id);
 let ADMIN = null;        // 当前登录的教师用户
 let CURRENT_SUBJECT = 'math';
-let DRAFTS = [];         // 解析草稿
+let DRAFTS = [];         // 解析草稿(持久化到 localStorage,刷新不丢)
+function loadDrafts(){ try{ return JSON.parse(localStorage.getItem('almath_admin_drafts')||'[]'); }catch(e){ return []; } }
+function saveDrafts(){ try{ localStorage.setItem('almath_admin_drafts', JSON.stringify(DRAFTS)); }catch(e){} }
 // _uid() 来自 db.js,不要重复声明
 
 /* ===== Account system（与学生端同套） ===== */
@@ -724,6 +760,7 @@ function loadBank(){
 function saveBank(b){ localStorage.setItem(Q_BANK_KEY, JSON.stringify(b)); }
 
 function initAll(){
+  DRAFTS = loadDrafts();   // 恢复未校对完的草稿
   renderLib();
   renderSubjectGrid();
   renderParseSrc();
@@ -1202,7 +1239,7 @@ function parseSelected(){
   if(!it){ toast('资料不存在'); return; }
   $('parseHint').textContent = `正在分析 ${it.name}（${it.pages} 页）...`;
   setTimeout(()=>{
-    DRAFTS = doParse(it);
+    DRAFTS = doParse(it); saveDrafts();
     $('parseHint').textContent = `共发现 ${DRAFTS.length} 道候选题目（人工校对后保存）`;
     $('parseResultCard').style.display='block';
     renderParseList();
@@ -1389,7 +1426,7 @@ function renderParseList(){
   $('parseStat').textContent = `共 ${DRAFTS.length} 条草稿 · 可在下方逐题校对后保存`;
   $('parseList').innerHTML = DRAFTS.map((q,idx)=>`<div class="q-edit">
     <div class="qe-row"><div class="lbl">题干</div><textarea data-f="q" data-i="${idx}" oninput="updateDraft(${idx},'q',this.value)">${escapeHtml(q.q)}</textarea></div>
-    <div class="qe-row"><div class="lbl">选项</div><div class="qe-opts">${(q.opts||[]).map((o,k)=>`<div class="qo"><input type="radio" name="dr-${idx}" ${k===0?'checked':''} onchange="updateDraft(${idx},'a',${k})"><input class="oi" type="text" value="${escapeHtml(o)}" oninput="updateDraftOpt(${idx},${k},this.value)"></div>`).join('')}<div class="qo" style="margin-top:4px"><span style="font-size:11.5px;color:var(--muted)">→ 当前正确答案：${'ABCD'[q.a]||'-'}</span></div></div></div>
+    <div class="qe-row"><div class="lbl">选项</div><div class="qe-opts">${(q.opts||[]).map((o,k)=>`<div class="qo"><input type="radio" name="dr-${idx}" ${k===q.a?'checked':''} onchange="updateDraft(${idx},'a',${k})"><input class="oi" type="text" value="${escapeHtml(o)}" oninput="updateDraftOpt(${idx},${k},this.value)"></div>`).join('')}<div class="qo" style="margin-top:4px"><span style="font-size:11.5px;color:var(--muted)">→ 当前正确答案：${'ABCD'[q.a]||'-'}</span></div></div></div>
     <div class="qe-row"><div class="lbl">类型</div><select data-f="type" onchange="updateDraft(${idx},'type',this.value)" style="flex:1"><option value="example" ${q.type==='example'?'selected':''}>例题（需要翻译）</option><option value="exam" ${q.type==='exam'?'selected':''}>真题（可不译）</option></select></div>
     <div class="qe-tr"><div class="qe-row"><div class="lbl">解析</div><textarea oninput="updateDraft(${idx},'exp',this.value)">${escapeHtml(q.exp||'')}</textarea></div>
       <div class="qe-row"><div class="lbl">中文翻译</div><textarea placeholder="题目中文翻译（例题必填，真题可选）" oninput="updateDraft(${idx},'translation',this.value)">${escapeHtml(q.translation||'')}</textarea></div></div>
@@ -1416,6 +1453,7 @@ window.saveOneDraft = (idx)=>{
   bank.unshift(d);
   saveBank(bank);
   DRAFTS.splice(idx,1);
+  saveDrafts();
   renderParseList();
   updateCounts();
   renderTrSubject();
@@ -1435,12 +1473,44 @@ window.saveAllDrafts = ()=>{
   });
   saveBank(bank);
   DRAFTS = [];
+  saveDrafts();
   renderParseList();
   updateCounts();
   renderTrSubject();
   toast('已保存 '+DRAFTS.length+' 道题');
 };
-window.clearDrafts = ()=>{ DRAFTS=[]; renderParseList(); updateCounts(); };
+window.clearDrafts = ()=>{ DRAFTS=[]; saveDrafts(); renderParseList(); updateCounts(); };
+
+/* ===== 快速出题(粘贴文本批量生成) ===== */
+window.quickAddQuestions = ()=>{
+  const raw = ($('quickText').value||'').trim();
+  if(!raw){ toast('请先粘贴题目内容'); return; }
+  const blocks = raw.split(/\n\s*\n+/).map(b=>b.trim()).filter(Boolean);
+  let made = 0, skipped = 0;
+  blocks.forEach(b=>{
+    const lines = b.split('\n').map(l=>l.trim()).filter(Boolean);
+    if(!lines.length) return;
+    let stem = [], opts = [], ans = null, exp = '';
+    lines.forEach(l=>{
+      const om = l.match(/^([A-Da-d])[\.、．:：\)]\s*(.+)$/);
+      const am = l.match(/^(答案|正确答案|Answer)\s*[:：]?\s*([A-Da-d])\b/);
+      const em = l.match(/^(解析|解答|Explanation)\s*[:：]?\s*(.+)$/);
+      if(am){ ans = 'ABCD'.indexOf(am[2].toUpperCase()); }
+      else if(em){ exp = em[2]; }
+      else if(om && opts.length < 4){ opts.push(om[2]); }
+      else { stem.push(l); }
+    });
+    if(!stem.length || opts.length < 2 || ans === null){ skipped++; return; }
+    DRAFTS.push({ q: stem.join('\n'), opts: opts, a: ans, exp: exp, type: 'exam', num: DRAFTS.length + 1, difficulty: 2 });
+    made++;
+  });
+  saveDrafts();
+  renderParseList(); updateCounts(); renderTrSubject();
+  $('quickText').value = '';
+  $('quickHint').textContent = made ? ('✓ 已生成 ' + made + ' 道草稿,请在下方校对后保存') : '';
+  if(skipped) $('quickHint').textContent += '(跳过 ' + skipped + ' 段格式不完整)';
+  toast(made ? ('⚡ 已生成 '+made+' 道题目草稿') : '没有解析出题目,请检查格式');
+};
 
 /* ===== 学科管理 ===== */
 function renderSubjectGrid(){
