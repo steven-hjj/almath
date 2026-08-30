@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="教师/家长后台 · 上传资料、解析题目、添加翻译、投入学生端">
+<title>AL 数学 · 教师后台</title>
+<style>
+:root{
+  --indigo:#4F46E5;--indigo2:#6D5FE8;--bg:#F6F7FB;--card:#fff;
+  --text:#1E1B32;--muted:#8B8FA3;--line:#EAECF3;--good:#10B981;--warn:#F59E0B;--danger:#EF4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+#app{max-width:1280px;margin:0 auto;padding:24px 28px 60px;min-height:100vh}
+/* 顶部 header */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:linear-gradient(135deg,#1E1B32 0%,#2D2750 100%);border-radius:18px;margin-bottom:18px;color:#fff;box-shadow:0 4px 16px rgba(30,27,50,.15)}
+.topbar .brand{display:flex;align-items:center;gap:12px}
+.topbar .brand .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#4F46E5,#7C6CF0);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-style:italic;font-size:18px;color:#fff;letter-spacing:1px}
+.topbar .brand h1{font-size:17px;font-weight:600;letter-spacing:-.2px}
+.topbar .brand p{font-size:11px;color:#9CA0B8;margin-top:1px}
+.topbar .user{display:flex;align-items:center;gap:12px}
+.topbar .user .uname{font-size:13px;font-weight:500}
+.topbar .user .urole{font-size:10.5px;background:rgba(255,255,255,.12);padding:2px 8px;border-radius:6px;color:#A8ABD0;letter-spacing:.3px}
+.topbar .user button{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.18);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-family:inherit}
+.topbar .user button:hover{background:rgba(255,255,255,.18)}
+/* tabs */
+.tabs{display:flex;gap:4px;background:#fff;border-radius:14px;padding:5px;margin-bottom:18px;border:1px solid var(--line);overflow-x:auto}
+.tab{padding:10px 18px;border-radius:10px;cursor:pointer;font-size:13.5px;color:var(--muted);font-weight:500;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:6px}
+.tab:hover{color:var(--text);background:#F8F9FE}
+.tab.active{background:linear-gradient(135deg,#4F46E5,#6D5FE8);color:#fff;box-shadow:0 4px 10px rgba(79,70,229,.3)}
+.tab .n{font-size:10.5px;background:rgba(255,255,255,.25);padding:1px 7px;border-radius:5px;min-width:18px;text-align:center}
+.tab:not(.active) .n{background:#EEF0FE;color:var(--indigo)}
+/* 内容卡片 */
+.card{background:#fff;border-radius:16px;padding:18px 22px;margin-bottom:14px;border:1px solid var(--line);box-shadow:0 1px 3px rgba(30,27,50,.04)}
+.card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.card-h h2{font-size:15px;font-weight:600}
+.card-h .h-sub{font-size:12px;color:var(--muted)}
+/* 学科选择 */
+.subject-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.subject-card{padding:16px 14px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer;transition:all .15s;background:#FAFBFE}
+.subject-card:hover{border-color:var(--indigo);background:#fff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(79,70,229,.08)}
+.subject-card.active{border-color:var(--indigo);background:#EEF0FE;box-shadow:0 0 0 3px rgba(79,70,229,.12)}
+.subject-card .sc-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:8px}
+.subject-card .sc-n{font-size:14px;font-weight:600;color:var(--text)}
+.subject-card .sc-s{font-size:11px;color:var(--muted);margin-top:2px}
+.subject-card .sc-num{font-size:10.5px;color:var(--indigo);margin-top:6px;font-weight:500}
+/* 上传区 */
+.upload-zone{border:2px dashed #C9CFE0;border-radius:14px;padding:30px;text-align:center;background:#FAFBFE;cursor:pointer;transition:all .2s}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--indigo);background:#EEF0FE}
+.upload-zone .uz-ic{font-size:36px;margin-bottom:6px;opacity:.7}
+.upload-zone .uz-t{font-size:14px;font-weight:600;color:var(--text)}
+.upload-zone .uz-s{font-size:11.5px;color:var(--muted);margin-top:4px}
+.upload-zone input[type=file]{display:none}
+/* 资料列表 */
+.lib-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:#fff;transition:all .15s}
+.lib-item:hover{border-color:var(--indigo);box-shadow:0 2px 8px rgba(79,70,229,.08)}
+.lib-item .li-ic{width:36px;height:36px;border-radius:8px;background:#FCEFEF;color:#DC2626;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.lib-item .li-info{flex:1;min-width:0}
+.lib-item .li-n{font-size:13.5px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lib-item .li-s{font-size:11px;color:var(--muted);margin-top:2px}
+.lib-item .li-ops{display:flex;gap:6px;flex-shrink:0}
+.btn{padding:7px 14px;border-radius:8px;border:none;background:var(--indigo);color:#fff;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn:hover{background:#3E36D4}
+.btn.sm{padding:5px 10px;font-size:11.5px}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.ghost:hover{background:#F4F5F9}
+.btn.danger{background:#FEE2E2;color:#B91C1C}
+.btn.danger:hover{background:#FECACA}
+.btn.ok{background:#D1FAE5;color:#065F46}
+.btn.ok:hover{background:#A7F3D0}
+/* 题目预览 */
+.q-edit{background:#FAFBFE;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+.q-edit .qe-row{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start}
+.q-edit .qe-row .lbl{width:74px;flex-shrink:0;font-size:11.5px;color:var(--muted);padding-top:7px}
+.q-edit input[type=text],.q-edit textarea,.q-edit select{width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit;background:#fff;outline:none}
+.q-edit textarea{resize:vertical;min-height:60px;line-height:1.5}
+.q-edit input:focus,.q-edit textarea:focus,.q-edit select:focus{border-color:var(--indigo)}
+.q-edit .qe-opts{display:flex;flex-direction:column;gap:6px;width:100%}
+.q-edit .qe-opts .qo{display:flex;gap:8px;align-items:center}
+.q-edit .qe-opts .qo input[type=radio]{margin:0;cursor:pointer}
+.q-edit .qe-opts .qo .oi{flex:1}
+.q-edit .qe-tr{padding:10px 0 0;border-top:1px solid var(--line);margin-top:6px}
+.q-edit .qe-tr .lbl{padding-top:0}
+.q-edit .qe-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.q-edit .qe-foot .status{font-size:11px;color:var(--muted)}
+.q-edit .qe-foot .ops{display:flex;gap:6px}
+/* 提示 */
+.toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#1E1B32;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.show{opacity:1}
+/* 登录 */
+#loginPage{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(160deg,#1E1B32 0%,#2D2750 60%,#3A3370 100%)}
+.login-box{background:#fff;border-radius:20px;padding:32px 28px;width:380px;max-width:calc(100vw - 32px);box-shadow:0 20px 60px rgba(20,18,38,.4)}
+.login-h{text-align:center;margin-bottom:20px}
+.login-h .logo{width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#4F46E5,#7C6CF0);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-style:italic;font-size:24px;color:#fff;margin:0 auto 12px;letter-spacing:1px}
+.login-h h1{font-size:18px;font-weight:600}
+.login-h p{font-size:12px;color:var(--muted);margin-top:4px}
+.lf{margin-bottom:12px}
+.lf label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:500}
+.lf input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;outline:none;background:#FAFBFE}
+.lf input:focus{border-color:var(--indigo);background:#fff}
+.login-btn{width:100%;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#4F46E5,#6D5FE8);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:6px;box-shadow:0 4px 12px rgba(79,70,229,.3)}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(79,70,229,.4)}
+.login-btn:disabled{background:#9CA3AF;cursor:not-allowed;box-shadow:none}
+.login-tabs{display:flex;gap:4px;background:#F4F5F9;padding:4px;border-radius:10px;margin-bottom:18px}
+.login-tab{flex:1;padding:8px;text-align:center;border-radius:7px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--muted)}
+.login-tab.active{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.lerr{padding:8px 11px;background:#FEE2E2;border:1px solid #FECACA;color:#B91C1C;border-radius:8px;font-size:11.5px;margin-top:8px;line-height:1.5}
+.lnote{font-size:11px;color:var(--muted);margin-top:14px;text-align:center;line-height:1.6}
+.lnote a{color:var(--indigo);text-decoration:none;cursor:pointer;font-weight:500}
+/* 空状态 */
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty .e-ic{font-size:48px;margin-bottom:8px;opacity:.6}
+.empty .e-t{font-size:15px;color:var(--text);font-weight:500;margin-bottom:4px}
+.empty .e-s{font-size:12.5px;color:var(--muted);line-height:1.6}
+/* 标签 */
+.tag{font-size:10.5px;padding:2px 8px;border-radius:5px;font-weight:500;display:inline-block}
+.tag.math{background:#EEF0FE;color:#4F46E5}
+.tag.physics{background:#FEF3C7;color:#92400E}
+.tag.chem{background:#D1FAE5;color:#065F46}
+.tag.bio{background:#FEE2E2;color:#B91C1C}
+.tag.eco{background:#FAE8FF;color:#6B21A8}
+.tag.translated{background:#D1FAE5;color:#065F46}
+.tag.pending{background:#FEF3C7;color:#92400E}
+.tag.unpublished{background:#F1F5F9;color:#475569}
+/* 学生端入口链接 */
+.exit-link{position:fixed;bottom:20px;right:20px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-size:12px;color:var(--text);text-decoration:none;box-shadow:0 4px 12px rgba(30,27,50,.1);font-weight:500;display:flex;align-items:center;gap:6px;z-index:50}
+.exit-link:hover{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+
+/* Modal */
+.modal-mask{position:fixed;inset:0;background:rgba(20,18,38,.45);z-index:999;display:none;align-items:center;justify-content:center;padding:28px}
+.modal-mask.show{display:flex}
+.modal{background:#fff;border-radius:18px;width:100%;max-width:520px;padding:22px;max-height:85vh;overflow-y:auto;animation:fadeIn .2s}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:12px}
+.modal .m-body{font-size:13px;line-height:1.7;color:#4B4966;max-height:60vh;overflow-y:auto}
+.modal .m-body input,.modal .m-body textarea,.modal .m-body select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;margin-top:6px}
+.modal .m-body label{display:block;font-size:11.5px;color:var(--muted);margin-top:8px;font-weight:500}
+.modal .m-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+.empty{padding:80px 20px}
+
+/* 响应式 */
+@media(max-width:640px){
+  #app{padding:14px 14px 80px}
+  .subject-grid{grid-template-columns:repeat(2,1fr)}
+  .lib-item .li-ops{flex-direction:column}
+}
+
+/* ===== 班级 ===== */
+.class-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.acc-list{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+.acc-pill{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F8F9FC;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.acc-pill:hover{border-color:var(--indigo);background:#EEF0FE}
+.acc-pill .acc-name{font-size:13px;font-weight:600;color:var(--text)}
+.acc-pill .acc-meta{font-size:10.5px;color:var(--muted)}
+.backup-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.bs-item{background:#F8F9FC;border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center}
+.bs-n{font-size:18px;font-weight:700;color:var(--indigo);font-family:Georgia,serif}
+.bs-l{font-size:10.5px;color:var(--muted);margin-top:2px}
+.backup-actions{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.backup-actions .btn{justify-content:center}
+.backup-tip{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;font-size:11.5px;padding:8px 12px;border-radius:8px;line-height:1.55}
+#backupJson{width:100%;height:120px;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:11px;font-family:monospace;margin-top:10px;resize:vertical}
+@media (max-width:768px){
+  .backup-stats{grid-template-columns:repeat(2,1fr)}
+}
+.csg-item{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 14px;text-align:center;transition:all .15s}
+.csg-item:hover{border-color:var(--indigo);transform:translateY(-1px)}
+.csg-n{font-size:24px;font-weight:700;color:var(--indigo);font-family:Georgia,serif;line-height:1.2}
+.csg-l{font-size:11.5px;color:var(--muted);margin-top:4px}
+.member-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.member-tbl th{padding:10px 8px;text-align:left;font-size:11.5px;font-weight:600;color:var(--muted);background:#F8F9FC;border-radius:8px 8px 0 0}
+.member-tbl th:first-child{padding-left:14px}
+.member-tbl td{padding:12px 8px;border-bottom:1px solid #F3F4F8;color:var(--text)}
+.member-tbl td:first-child{padding-left:14px}
+.member-tbl tr.top-rank{background:linear-gradient(90deg,#FEF3C7 0%,transparent 60%)}
+.member-tbl .rank-no{display:inline-block;width:24px;height:24px;border-radius:50%;background:#EEF0FE;color:#4F46E5;font-weight:700;line-height:24px;text-align:center;font-size:12px;font-family:Georgia,serif}
+.member-tbl .rank-no.gold{background:linear-gradient(135deg,#FFD700,#FFA500);color:#fff}
+.member-tbl .rank-no.silver{background:linear-gradient(135deg,#E5E7EB,#9CA3AF);color:#fff}
+.member-tbl .rank-no.bronze{background:linear-gradient(135deg,#F59E0B,#92400E);color:#fff}
+@media (max-width:768px){
+  .class-stat-grid{grid-template-columns:repeat(2,1fr)}
+  .member-tbl{font-size:11.5px}
+  .member-tbl th:nth-child(6),.member-tbl td:nth-child(6){display:none}
+}
+
+/* ===== 联系/反馈 弹窗样式(与学生端一致) ===== */
+.contact-card{padding:6px 4px 0}
+.contact-head{display:flex;gap:12px;align-items:center;margin-bottom:14px;padding:6px 4px 14px;border-bottom:1px dashed #EEF0F6}
+.contact-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#EEF0FE,#E0E7FF);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.contact-title{font-size:16px;font-weight:600;color:#1E1B32}
+.contact-sub{font-size:12px;color:#8B8FA3;margin-top:2px}
+.cf-row{display:flex;align-items:center;gap:12px;padding:12px 10px;background:#F8F9FE;border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.cf-row:hover{background:#EEF0FE}
+.cf-ic{width:38px;height:38px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 1px 3px rgba(30,27,50,.06)}
+.cf-info{flex:1;min-width:0}
+.cf-l{font-size:11px;color:#8B8FA3;margin-bottom:2px}
+.cf-v{font-size:14px;font-weight:600;color:#1E1B32;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cf-copy{font-size:11px;color:#4F46E5;background:#EEF0FE;padding:5px 10px;border-radius:8px;flex-shrink:0;font-weight:600}
+
+/* ===== Tabs 横向滚动 + 紧凑 ===== */
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;padding:6px 4px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.tabs::-webkit-scrollbar{height:4px}
+.tabs::-webkit-scrollbar-thumb{background:#C7CAD9;border-radius:2px}
+.tab{flex-shrink:0;padding:8px 12px;font-size:13px;color:var(--muted);border-radius:8px;cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap}
+.tab:hover{background:#F8F9FE}
+.tab.active{background:var(--indigo);color:#fff;font-weight:600}
+.tab.active .n{background:rgba(255,255,255,.25);color:#fff}
+.tab .n{background:#EEF0FE;color:var(--indigo);font-size:10px;padding:2px 6px;border-radius:8px;margin-left:4px;font-weight:600}
+
+/* ===== 列表条目(作业/公告/视频/答疑统一) ===== */
+.list-item{padding:14px 16px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:#fff;transition:all .15s}
+.list-item:hover{border-color:var(--indigo);box-shadow:0 2px 8px rgba(79,70,229,.08)}
+.list-item-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.list-item-t{font-size:14px;font-weight:600;color:var(--text)}
+.list-item-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.list-item-body{font-size:13px;color:var(--text);line-height:1.6;background:#F8F9FE;padding:10px 12px;border-radius:8px;margin-bottom:8px;white-space:pre-wrap;word-break:break-word}
+.list-item-actions{display:flex;gap:6px;flex-wrap:wrap}
+.priority-normal{color:var(--muted)}
+.priority-high{color:#D97706}
+.priority-urgent{color:#DC2626;font-weight:600}
+
+/* ===== 排行 ===== */
+.lb-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+.lb-rank{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
+.lb-rank.gold{background:linear-gradient(135deg,#FFD700,#FFA500);color:#fff}
+.lb-rank.silver{background:linear-gradient(135deg,#C0C0C0,#A0A0A0);color:#fff}
+.lb-rank.bronze{background:linear-gradient(135deg,#CD7F32,#8B4513);color:#fff}
+.lb-rank.normal{background:#EEF0FE;color:var(--indigo)}
+.lb-name{flex:1;min-width:0}
+.lb-nickname{font-size:14px;font-weight:600}
+.lb-stats{font-size:11px;color:var(--muted);margin-top:2px}
+.lb-acc{font-size:18px;font-weight:700;color:var(--indigo);flex-shrink:0;text-align:right}
+.lb-acc small{font-size:11px;color:var(--muted);font-weight:400}
+
+/* ===== 学情 ===== */
+.ana-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.ana-stat{background:linear-gradient(135deg,#EEF0FE,#E0E7FF);padding:14px;border-radius:12px;text-align:center}
+.ana-stat-v{font-size:24px;font-weight:700;color:var(--indigo);margin-bottom:4px}
+.ana-stat-l{font-size:11px;color:var(--muted)}
+@media (max-width:768px){.ana-overview{grid-template-columns:repeat(2,1fr)}}
+.ana-bar{height:8px;background:#F1F3F7;border-radius:4px;overflow:hidden;margin-top:4px}
+.ana-bar-fill{height:100%;background:linear-gradient(90deg,#4F46E5,#A855F7);transition:width .3s}
+.weak-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+.weak-rank{font-size:11px;color:var(--muted);font-weight:700;width:24px;flex-shrink:0}
+.weak-name{flex:1;font-size:13px;font-weight:600}
+.weak-stat{font-size:12px;color:#DC2626;font-weight:600;flex-shrink:0}
+
+/* ===== 视频 ===== */
+.vid-card{display:flex;gap:14px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+.vid-thumb{width:120px;height:68px;background:linear-gradient(135deg,#1E1B32,#4F46E5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;flex-shrink:0}
+.vid-info{flex:1;min-width:0}
+.vid-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.vid-meta{font-size:11px;color:var(--muted)}
+.vid-actions{display:flex;gap:6px;margin-top:6px}
+
+/* ===== 答疑 ===== */
+.qa-card{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:14px;padding:14px}
+.qa-asker{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;color:var(--muted)}
+.qa-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
+.qa-content{font-size:13px;color:var(--text);line-height:1.6;background:#F8F9FE;padding:10px 12px;border-radius:8px;margin-bottom:10px;white-space:pre-wrap}
+.qa-answers{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.qa-answer{background:#E0F2FE;border-left:3px solid var(--indigo);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:8px;font-size:13px}
+.qa-answer-meta{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600}
+.qa-input{display:flex;gap:6px;margin-top:8px}
+.qa-input input{flex:1;border:1.5px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit}
+.qbadge{background:#DC2626;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:700}
+
+/* ===== 题目勾选池 ===== */
+.qpool-item{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;margin-bottom:4px;cursor:pointer;transition:background .15s}
+.qpool-item:hover{background:#F8F9FE}
+.qpool-item.selected{background:#EEF0FE;border:1px solid var(--indigo)}
+.qpool-item input{width:18px;height:18px;flex-shrink:0;cursor:pointer}
+.qpool-q{flex:1;font-size:13px;line-height:1.5;color:var(--text);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.qpool-meta{font-size:11px;color:var(--muted);margin-left:8px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div id="loginPage" style="display:none">
+  <div class="login-box">
+    <div class="login-h">
+      <div class="logo">教</div>
+      <h1>教师后台</h1>
+      <p>上传资料 · 自动解析 · 翻译题目 · 投入学生端</p>
+    </div>
+    <div class="login-tabs">
+      <div class="login-tab active" data-tab="login" onclick="showLoginTab('login')">登录</div>
+      <div class="login-tab" data-tab="register" onclick="showLoginTab('register')">注册新教师</div>
+    </div>
+    <div id="ltab-login">
+      <div class="lf"><label>用户名（中文 / 英文）</label><input id="loginUser" placeholder="例：edexcel2026" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
+      <div class="lf"><label>密码</label><input id="loginPass" type="password" placeholder="≥6 位 · 含大小写字母" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
+      <div id="loginErr" class="lerr" style="display:none"></div>
+      <button class="login-btn" onclick="doAdminLogin()">登 录</button>
+    </div>
+    <div id="ltab-register" style="display:none">
+      <div class="lf"><label>用户名（中英文 · 不可重复）</label><input id="regUser" placeholder="例：张老师 / MrsZhang"></div>
+      <div class="lf"><label>手机号（找回账号用）</label><input id="regPhone" type="tel" maxlength="11" placeholder="11 位 1 开头"></div>
+      <div class="lf"><label>密码</label><input id="regPass" type="password" placeholder="≥6 位 · 含大小写字母"></div>
+      <div class="lf"><label>确认密码</label><input id="regPass2" type="password" onkeydown="if(event.key==='Enter')doAdminRegister()"></div>
+      <div id="regErr" class="lerr" style="display:none"></div>
+      <button class="login-btn" onclick="doAdminRegister()">注 册</button>
+    </div>
+    <div class="lnote">登录后默认角色为「教师」，可上传资料、维护题库。已注册的教师账号与学生端账号是同一套体系。</div>
+    <div class="acc-list" id="existingAccounts"></div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">教</div>
+      <div>
+        <h1>教师 / 家长后台</h1>
+        <p>上传资料 · 解析题目 · 翻译 · 投入学生端</p>
+      </div>
+    </div>
+    <div class="user">
+      <span class="uname" id="tdUname">—</span>
+      <span class="urole">教师</span>
+      <button onclick="openDataBackup()" title="备份 / 恢复所有数据">💾 备份</button>
+      <button onclick="openFeedback()" title="反馈 / 赞助">💬 反馈</button>
+      <button onclick="adminLogout()">退出</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="library" onclick="switchAdminTab('library')">📚 资料库 <span class="n" id="nLib">0</span></div>
+    <div class="tab" data-tab="parse" onclick="switchAdminTab('parse')">✏️ 题目解析 <span class="n" id="nParse">0</span></div>
+    <div class="tab" data-tab="subject" onclick="switchAdminTab('subject')">🎯 学科管理</div>
+    <div class="tab" data-tab="translate" onclick="switchAdminTab('translate')">🌐 翻译工作台 <span class="n" id="nTr">0</span></div>
+    <div class="tab" data-tab="published" onclick="switchAdminTab('published')">✅ 已投放 <span class="n" id="nPub">0</span></div>
+    <div class="tab" data-tab="leads" onclick="switchAdminTab('leads')" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#92400E;font-weight:600">🎯 线索管理 <span class="n" id="nLeads" style="background:#F59E0B;color:#fff">0</span></div>
+    <div class="tab" data-tab="support" onclick="switchAdminTab('support')" style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE);color:#1E40AF;font-weight:600">💬 客服 <span class="n" id="nSup" style="background:#2563EB;color:#fff">0</span></div>
+  </div>
+
+  <!-- 资料库 -->
+  <div class="admin-page" id="ap-library">
+    <div class="card">
+      <div class="card-h">
+        <h2>上传新资料</h2>
+        <span class="h-sub">支持 PDF 讲义、真题卷、教辅（含扫描件时尽量选择文字版）</span>
+      </div>
+      <label class="upload-zone" id="uploadZone" for="libFile">
+        <div class="uz-ic">📥</div>
+        <div class="uz-t">点击或拖拽 PDF 到此处</div>
+        <div class="uz-s">支持多文件 · 单文件 ≤ 30MB · 解析仅在本机完成</div>
+        <input type="file" id="libFile" accept="application/pdf" multiple>
+      </label>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <h2>已上传资料</h2>
+        <span class="h-sub" id="libCount">0 份</span>
+      </div>
+      <div id="libList"></div>
+    </div>
+  </div>
+
+  <!-- 题目解析 -->
+  <div class="admin-page" id="ap-parse" style="display:none">
+    <div class="card">
+      <div class="card-h">
+        <h2>从资料中解析题目</h2>
+        <span class="h-sub">选资料 → 自动按行扫描 + 题号匹配 → 人工校对</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <select id="parseSrc" style="border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit;min-width:200px"></select>
+        <button class="btn" onclick="parseSelected()">⚙ 开始解析</button>
+        <span class="h-sub" id="parseHint" style="margin-left:auto"></span>
+      </div>
+    </div>
+    <div class="card" id="parseResultCard" style="display:none">
+      <div class="card-h">
+        <h2>解析结果 <span style="color:var(--muted);font-weight:400;font-size:12px" id="parseStat"></span></h2>
+        <div style="display:flex;gap:6px">
+          <button class="btn sm" onclick="saveAllDrafts()">保存全部为草稿</button>
+          <button class="btn sm ghost" onclick="clearDrafts()">清空</button>
+        </div>
+      </div>
+      <div id="parseList"></div>
+    </div>
+  </div>
+
+  <!-- 学科管理 -->
+  <div class="admin-page" id="ap-subject" style="display:none">
+    <div class="card">
+      <div class="card-h">
+        <h2>学科与章节</h2>
+        <span class="h-sub">选择学科查看已投放题目</span>
+      </div>
+      <div class="subject-grid" id="subjectGrid"></div>
+    </div>
+    <div class="card" id="subjectQs" style="display:none">
+      <div class="card-h">
+        <h2 id="subjectTitle">—</h2>
+        <div style="display:flex;gap:6px">
+          <button class="btn sm" onclick="addManualQ()">+ 手工添加</button>
+        </div>
+      </div>
+      <div id="subjectQList"></div>
+    </div>
+  </div>
+
+  <!-- 翻译工作台 -->
+  <div class="admin-page" id="ap-translate" style="display:none">
+    <div class="card">
+      <div class="card-h">
+        <h2>待翻译题目</h2>
+        <span class="h-sub">例题必须有翻译 · 真题可暂不译</span>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <select id="trSubject" style="border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit" onchange="renderTranslateList()"></select>
+        <select id="trType" style="border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit" onchange="renderTranslateList()">
+          <option value="all">全部</option>
+          <option value="pending">待翻译</option>
+          <option value="done">已翻译</option>
+        </select>
+      </div>
+      <div id="translateList"></div>
+    </div>
+  </div>
+
+  <!-- 已投放 -->
+  <div class="admin-page" id="ap-published" style="display:none">
+    <div class="card">
+      <div class="card-h">
+        <h2>已投放的题目（学生端可见）</h2>
+        <span class="h-sub">点击可下架 · 撤回后学生端立即不可见</span>
+      </div>
+      <div id="pubList"></div>
+    </div>
+  </div>
+
+  <!-- 💬 在线客服 -->
+  <div class="admin-page" id="ap-support" style="display:none">
+    <div class="card" style="background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);border-color:#93C5FD">
+      <div class="card-h">
+        <h2 style="color:#1E40AF">💬 客服咨询台</h2>
+        <span class="h-sub" style="color:#3B82F6">学生的咨询直达这里 · 回复后学生端立即可见</span>
+      </div>
+      <div style="font-size:12.5px;color:#1D4ED8;line-height:1.7">
+        📩 未读会话自动置顶,红色徽章 = 未读条数<br>
+        💡 消息云端同步:学生手机发的咨询,任何设备打开后台都能看到
+      </div>
+    </div>
+    <div class="card" id="supThreadCard" style="display:none">
+      <div class="card-h">
+        <h2 id="supThreadTitle">会话</h2>
+        <button class="btn sm ghost" onclick="closeSupThread()">← 返回列表</button>
+      </div>
+      <div id="supMsgs" style="max-height:44vh;overflow-y:auto;padding:8px;border:1px solid var(--line);border-radius:10px;background:#FAFAFC;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px">
+        <input id="supReplyInput" placeholder="回复学生… (Enter 发送)" maxlength="500" style="flex:1;border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit" onkeydown="if(event.key==='Enter')replySupport()">
+        <button class="btn primary" onclick="replySupport()">📤 回复</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <h2>会话列表</h2>
+        <span class="h-sub" id="supThreadCount">0 个会话</span>
+      </div>
+      <div id="supList"></div>
+    </div>
+  </div>
+
+  <!-- ⭐ 线索管理 -->
+  <div class="admin-page" id="ap-leads" style="display:none">
+    <div class="card" style="background:linear-gradient(135deg,#FFFBEB 0%,#FEF3C7 100%);border-color:#FCD34D">
+      <div class="card-h">
+        <h2 style="color:#92400E">🎯 销售线索管理</h2>
+        <span class="h-sub" style="color:#A16207">所有进入程序的用户都会留下手机号,直接用于未来排课咨询</span>
+      </div>
+      <div style="font-size:12.5px;color:#7E6B1F;line-height:1.7">
+        📌 用途:市场开发联系 · 排课需求咨询 · 课程推广跟进<br>
+        ✅ 所有注册用户(包括学生账号)都会自动出现,无需额外操作<br>
+        📤 一键导出 CSV 即可发给销售/BD 同事
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <h2>线索汇总</h2>
+        <div style="display:flex;gap:6px">
+          <button class="btn sm ghost" onclick="loadLeads()">🔄 刷新</button>
+          <button class="btn sm" onclick="exportLeadsCSV()">📤 导出 CSV</button>
+          <button class="btn sm" onclick="copyAllPhones()">📋 一键复制全部手机号</button>
+        </div>
+      </div>
+      <div id="leadsStats" class="class-stat-grid"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <h2>用户列表</h2>
+        <span class="h-sub" id="leadsCount">0 人</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <input id="leadSearch" placeholder="🔍 搜索用户名/昵称/手机号" style="flex:1;min-width:200px;border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit" oninput="filterLeads()">
+        <select id="leadRole" onchange="filterLeads()" style="border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;font-size:13px;font-family:inherit">
+          <option value="all">全部角色</option>
+          <option value="student">仅学生</option>
+          <option value="teacher">仅教师</option>
+        </select>
+        <select id="leadStatus" onchange="filterLeads()" style="border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;font-size:13px;font-family:inherit">
+          <option value="all">全部状态</option>
+          <option value="pending">🟡 待跟进</option>
+          <option value="contacted">📞 已联系</option>
+          <option value="closed">✅ 已成交/关闭</option>
+        </select>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#9A3412;cursor:pointer;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:8px 12px;font-weight:600">
+          <input type="checkbox" id="leadIntentOnly" onchange="filterLeads()" style="margin:0">🔥 有咨询意向
+        </label>
+      </div>
+      <div id="leadsList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-mask" id="modalMask" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3 id="modalTitle">编辑题目</h3>
+    <div class="m-body" id="modalBody"></div>
+    <div class="m-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<a class="exit-link" href="https://6b3378ea1f1d4c86920c00bfff802b8a.app.workbuddy.link/" target="_blank">🎓 打开学生端 →</a>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="db.js"></script>
+<script>
+if(window['pdfjsLib']) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+/* ===== 数据 schema（与学生端共享 localStorage） ===== */
+const ACC_KEY = 'almath_accounts';
+const LIB_KEY = 'almath_lib';        // 资料库 [{id,name,size,subject,uploadedAt,pages,text}]
+const Q_BANK_KEY = 'almath_admin_bank'; // 题目库 [{id,subject,chapter,type:'example'|'exam',q,opts,a,exp,hint,translation,translated,published,source,addedAt}]
+const STATS_KEY = 'almath_v6_';      // 学生学习数据 key 前缀（用于教师端读取）
+
+const SUBJECTS = [
+  {id:'math', name:'数学',  ic:'∑', color:'#EEF0FE', cc:'#4F46E5', en:'Mathematics'},
+  {id:'physics', name:'物理', ic:'⚛', color:'#FEF3C7', cc:'#92400E', en:'Physics'},
+  {id:'chem', name:'化学', ic:'🧪', color:'#D1FAE5', cc:'#065F46', en:'Chemistry'},
+  {id:'bio', name:'生物', ic:'🧬', color:'#FEE2E2', cc:'#B91C1C', en:'Biology'},
+  {id:'eco', name:'经济', ic:'£', color:'#FAE8FF', cc:'#6B21A8', en:'Economics'},
+];
+
+const $ = id => document.getElementById(id);
+let ADMIN = null;        // 当前登录的教师用户
+let CURRENT_SUBJECT = 'math';
+let DRAFTS = [];         // 解析草稿
+// _uid() 来自 db.js,不要重复声明
+
+/* ===== Account system（与学生端同套） ===== */
+function loadAccounts(){
+  let base;
+  try{ base = JSON.parse(localStorage.getItem(ACC_KEY)||'{"users":{}}'); }
+  catch(e){ base = {users:{}}; }
+  // 合并云端新表(almath_cloud_v1.accounts)的 role/nickname,老表缺 role 会导致刷新被踢回登录页
+  try{
+    const cloud = JSON.parse(localStorage.getItem('almath_cloud_v1')||'{}');
+    const acc2 = cloud.accounts || {};
+    for (const u of Object.keys(acc2)) {
+      if(!base.users[u]) base.users[u] = { pass: acc2[u].password || '', nick: acc2[u].nickname || u, phone: acc2[u].phone || '', avatar: acc2[u].avatar || '👤' };
+      if(acc2[u].role) base.users[u].role = acc2[u].role;
+    }
+  }catch(e){}
+  const cur = (function(){ try{ return localStorage.getItem('almath_session') || sessionStorage.getItem('almath_session'); }catch(e){ return null; } })();
+  return Object.assign({}, base, { current: cur });
+}
+function saveAccounts(acc){ localStorage.setItem(ACC_KEY, JSON.stringify({users:acc.users})); }
+function setSession(u){ try{ if(u){ localStorage.setItem('almath_session', u); } else { localStorage.removeItem('almath_session'); sessionStorage.removeItem('almath_session'); } }catch(e){} }
+async function hashPwd(s){
+  const buf = new TextEncoder().encode(s);
+  const h = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function validU(u){
+  if(!u || u.length<3 || u.length>20) return '用户名 3-20 个字符';
+  if(!/^[A-Za-z\u4e00-\u9fff\u3400-\u4dbf]+$/.test(u)) return '用户名只能中文/英文';
+  return null;
+}
+function validP(p){
+  if(!p || p.length<6) return '密码至少 6 位';
+  if(!/[A-Z]/.test(p) || !/[a-z]/.test(p)) return '密码需含大小写字母';
+  return null;
+}
+
+/* ===== Login / Register ===== */
+function showLoginTab(tab){
+  document.querySelectorAll('.login-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+  $('ltab-login').style.display = tab==='login'?'block':'none';
+  $('ltab-register').style.display = tab==='register'?'block':'none';
+  $('loginErr').style.display='none';
+  $('regErr').style.display='none';
+}
+function showErr(id, msg){
+  const el = $(id);
+  if(!el) return;
+  if(msg){ el.textContent=msg; el.style.display='block'; } else el.style.display='none';
+}
+async function doAdminLogin(){
+  const u = $('loginUser').value.trim();
+  const p = $('loginPass').value;
+  const uErr = validU(u); if(uErr){ showErr('loginErr', uErr); return; }
+  const pErr = validP(p); if(pErr){ showErr('loginErr', pErr); return; }
+  try {
+    const r = await A.req('POST', '/api/auth/login', { username: u, password: p });
+    A.setAuth(r.account.username, r.token, 'teacher');
+    // 把 role 写回老账号表 + 云端新表,保证刷新后自动登录判定通过
+    try{
+      const acc = JSON.parse(localStorage.getItem('almath_accounts')||'{"users":{}}');
+      if(acc.users[r.account.username]){ acc.users[r.account.username].role = 'teacher'; }
+      else { acc.users[r.account.username] = { pass:'', nick: r.account.nickname || u, phone: r.account.phone || '', avatar:'👤', role:'teacher' }; }
+      localStorage.setItem('almath_accounts', JSON.stringify(acc));
+      // 云端新表同样升级 role,防止 pull 时被旧值覆盖
+      const cloud = JSON.parse(localStorage.getItem('almath_cloud_v1')||'{}');
+      cloud.accounts = cloud.accounts || {};
+      cloud.accounts[r.account.username] = Object.assign({}, cloud.accounts[r.account.username] || {}, { username: r.account.username, role: 'teacher' });
+      localStorage.setItem('almath_cloud_v1', JSON.stringify(cloud));
+      if(typeof scheduleCloudPush === 'function') scheduleCloudPush();
+    }catch(e){}
+    ADMIN = u;
+    enterAdmin();
+  } catch(e){
+    showErr('loginErr', '账号或密码错误');
+  }
+}
+async function doAdminRegister(){
+  const u = $('regUser').value.trim();
+  const phone = $('regPhone').value.trim();
+  const p = $('regPass').value;
+  const p2 = $('regPass2').value;
+  const uErr = validU(u); if(uErr){ showErr('regErr', uErr); return; }
+  if(!/^1\d{10}$/.test(phone)){ showErr('regErr','手机号格式错误'); return; }
+  const pErr = validP(p); if(pErr){ showErr('regErr', pErr); return; }
+  if(p!==p2){ showErr('regErr','两次密码不一致'); return; }
+  try {
+    const r = await A.req('POST', '/api/auth/register', { username: u, password: p, phone, nickname: u, role: 'teacher' });
+    A.setAuth(r.account.username, r.token, 'teacher');
+    ADMIN = u;
+    enterAdmin();
+  } catch(e){
+    showErr('regErr', e.message || '注册失败');
+  }
+}
+function enterAdmin(){
+  setSession(ADMIN); // 持久化会话,刷新/重开浏览器自动登录
+  $('loginPage').style.display='none';
+  $('app').style.display='block';
+  $('tdUname').textContent = ADMIN;
+  initAll();
+}
+function adminLogout(){
+  A.clearAuth(); setSession(''); ADMIN = null;
+  $('app').style.display='none';
+  $('loginPage').style.display='flex';
+  showLoginTab('login');
+}
+
+/* ===== 反馈 / 赞助 / 联系(教师端) ===== */
+const DEV_INFO_ADMIN = {
+  email:    '2108812748@qq.com',
+  phone:    '17810622045',
+  wechat:   '17810622045'
+};
+function adminCopyText(text, label){
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>toast(label+' 已复制'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); toast(label+' 已复制'); }
+    catch(e){ toast(text); }
+    document.body.removeChild(ta);
+  }
+}
+function adminContactRow(icon, label, value){
+  return `<div class="cf-row" onclick="adminCopyText('${value}','${label}')">
+    <div class="cf-ic">${icon}</div>
+    <div class="cf-info"><div class="cf-l">${label}</div><div class="cf-v">${value}</div></div>
+    <div class="cf-copy">复制</div>
+  </div>`;
+}
+function openFeedback(){
+  const I = DEV_INFO_ADMIN;
+  const body = `
+    <div class="contact-card">
+      <div class="contact-head">
+        <div class="contact-avatar">🛟</div>
+        <div><div class="contact-title">客服反馈 & 赞助</div>
+        <div class="contact-sub">问题反馈 · 改进建议 · 支持平台</div></div>
+      </div>
+      <div style="font-size:13px;color:var(--text);line-height:1.7;padding:0 4px 12px">
+        如有问题或建议,可通过以下方式联系开发者:<br>
+        <span style="color:var(--muted);font-size:11.5px">📌 反馈建议格式:问题描述 + 截图 + 操作步骤</span>
+      </div>
+      ${adminContactRow('📧','开发者邮箱', I.email)}
+      ${adminContactRow('📱','开发者手机', I.phone)}
+      ${adminContactRow('💬','开发者微信', I.wechat)}
+      <div style="margin-top:12px;padding:10px 12px;background:#FFF6E5;border-radius:10px;font-size:12px;color:#7E6B1F;line-height:1.7;border-left:3px solid #F59E0B">
+        ☕ 如果这个教师后台帮到了你,也欢迎赞助作者一杯咖啡,支持后续开发 🚀
+      </div>
+    </div>`;
+  showModal('客服反馈 & 赞助', body,
+    `<button onclick="closeModal()">关闭</button>
+     <a class="btn primary" href="mailto:${I.email}?subject=AL数学教师端反馈" style="text-decoration:none">发送邮件</a>`);
+}
+
+/* ===== Init & Renders ===== */
+function loadLib(){
+  try{ return JSON.parse(localStorage.getItem(LIB_KEY)||'[]'); }catch(e){ return []; }
+}
+function saveLib(l){ localStorage.setItem(LIB_KEY, JSON.stringify(l)); }
+function loadBank(){
+  try{ return JSON.parse(localStorage.getItem(Q_BANK_KEY)||'[]'); }catch(e){ return []; }
+}
+function saveBank(b){ localStorage.setItem(Q_BANK_KEY, JSON.stringify(b)); }
+
+function initAll(){
+  renderLib();
+  renderSubjectGrid();
+  renderParseSrc();
+  renderTrSubject();
+  renderPubList();
+  updateCounts();
+  switchAdminTab('library');
+  // 线索管理(后台预加载,不阻塞首屏)
+  setTimeout(()=>{ try{ loadLeads(); }catch(e){} }, 1500);
+  // 客服未读徽章(每60秒轮询一次)
+  setTimeout(()=>{ refreshSupportUnread(); }, 2500);
+  setInterval(refreshSupportUnread, 60000);
+}
+
+function updateCounts(){
+  const lib = loadLib(), bank = loadBank();
+  $('nLib').textContent = lib.length;
+  $('libCount').textContent = lib.length + ' 份';
+  const drafts = DRAFTS.length;
+  $('nParse').textContent = drafts;
+  $('nTr').textContent = bank.filter(q=>!q.translation).length;
+  $('nPub').textContent = bank.filter(q=>q.published).length;
+}
+
+function switchAdminTab(t){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===t));
+  document.querySelectorAll('.admin-page').forEach(p=>p.style.display='none');
+  $('ap-'+t).style.display='block';
+  if(t==='translate') renderTranslateList();
+  if(t==='published') renderPubList();
+  if(t==='subject') renderSubjectQs();
+  if(t==='leads') renderLeadsTab();
+  if(t==='support') renderSupportTab();
+}
+
+// 云端同步到达时,若在线索页则自动刷新列表(学生注册/答题/咨询可实时浮现)
+window.addEventListener('almath-cloud-sync', () => {
+  try {
+    const tab = document.querySelector('.tab[data-tab="leads"]');
+    if (tab && tab.classList.contains('active') && typeof loadLeads === 'function') loadLeads();
+    const sTab = document.querySelector('.tab[data-tab="support"]');
+    if (sTab && sTab.classList.contains('active') && typeof renderSupportTab === 'function') renderSupportTab();
+    else refreshSupportUnread();
+  } catch(e) {}
+});
+
+/* ============ 💬 在线客服 ============ */
+let _supThreadUser = null;
+let _supPollTimer = null;
+
+async function renderSupportTab(){
+  try {
+    const r = await A.req('GET', '/api/support');
+    const threads = (r && r.threads) || [];
+    updateSupBadge(r);
+    $('nSup').textContent = threads.reduce((s, t) => s + t.unread, 0);
+    $('supThreadCount').textContent = threads.length + ' 个会话';
+    const el = $('supList');
+    if (!threads.length) {
+      el.innerHTML = '<div class="h-sub" style="padding:24px;text-align:center">还没有学生发消息 · 学生端「关于 → 💬 在线客服」入口已上线</div>';
+      return;
+    }
+    el.innerHTML = threads.map(t => `
+      <div class="lib-item" onclick="openSupThread('${t.username}')" style="position:relative">
+        <div class="lib-ic" style="background:${t.unread > 0 ? '#DBEAFE;color:#1D4ED8' : 'var(--line)'}">${t.avatar || '👤'}</div>
+        <div style="flex:1;min-width:0">
+          <div class="lib-name">${escapeHtml(t.nickname)} <span style="color:var(--muted);font-weight:400">@${escapeHtml(t.username)}</span></div>
+          <div class="lib-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:380px">${t.lastFrom === 'teacher' ? '<b style=\"color:#2563EB\">[我]</b> ' : ''}${escapeHtml(t.lastText || '').slice(0,60)}</div>
+        </div>
+        ${t.unread > 0
+          ? `<span style="background:#E53E4E;color:#fff;font-size:11px;border-radius:10px;padding:2px 8px;font-weight:700">${t.unread}</span>`
+          : `<span style="color:var(--muted);font-size:11px">${formatTime(t.lastTime)}</span>`}
+      </div>`).join('');
+  } catch(e) { console.warn('renderSupportTab:', e.message); }
+}
+
+function updateSupBadge(data){
+  // 徽章由调用处更新;这里留作扩展
+}
+
+async function refreshSupportUnread(){
+  try {
+    const r = await A.req('GET', '/api/support');
+    const unread = r && r.threads ? r.threads.reduce((s, t) => s + t.unread, 0) : 0;
+    $('nSup').textContent = unread;
+  } catch(e) {}
+}
+
+async function openSupThread(username){
+  _supThreadUser = username;
+  clearInterval(_supPollTimer);
+  $('supThreadCard').style.display = 'block';
+  $('supReplyInput').value = '';
+  try {
+    const accounts = await A.req('GET', '/api/leads');
+    const l = (accounts.list || []).find(x => x.username === username);
+    $('supThreadTitle').textContent = '💬 ' + ((l && l.nickname) || username) + ' @' + username + (l && l.phone ? (' · ' + l.phone) : '');
+  } catch(e) { $('supThreadTitle').textContent = '💬 @' + username; }
+  await renderSupThread();
+  // 标记已读(本地界面即时清零 + 云端标记)
+  $('nSup').textContent = Math.max(0, parseInt($('nSup').textContent || '0', 10));
+  A.req('POST', '/api/support/' + username + '/read', {}).catch(() => {});
+  setTimeout(refreshSupportUnread, 2500);
+  _supPollTimer = setInterval(async () => {
+    if (!_supThreadUser || !$('supMsgs')) { clearInterval(_supPollTimer); return; }
+    await renderSupThread(false);
+  }, 15000);
+  $('supThreadCard').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+async function renderSupThread(markRead){
+  if (!_supThreadUser) return;
+  try {
+    const r = await A.req('GET', '/api/support/' + _supThreadUser);
+    const msgs = (r && r.messages) || [];
+    $('supMsgs').innerHTML = msgs.map(m => `
+      <div style="display:flex;margin-bottom:10px;justify-content:${m.from === 'teacher' ? 'flex-end' : 'flex-start'}">
+        <div style="max-width:75%;padding:8px 12px;font-size:13px;line-height:1.5;word-break:break-word;${m.from === 'teacher'
+          ? 'background:#4F46E5;color:#fff;border-radius:12px 12px 3px 12px;'
+          : 'background:#EEF0FE;color:var(--text);border-radius:12px 12px 12px 3px;'}">
+          ${m.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}
+          <div style="font-size:10px;margin-top:4px;opacity:.65;text-align:right">${m.time ? new Date(m.time).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'}) : ''}${m.from === 'teacher' ? ' · 我' : ''}</div>
+        </div>
+      </div>`).join('') || '<div class="h-sub">暂无消息</div>';
+    $('supMsgs').scrollTop = $('supMsgs').scrollHeight;
+  } catch(e) {}
+}
+
+function closeSupThread(){
+  _supThreadUser = null;
+  clearInterval(_supPollTimer);
+  $('supThreadCard').style.display = 'none';
+  renderSupportTab();
+}
+
+async function replySupport(){
+  const inp = $('supReplyInput');
+  const text = (inp.value || '').trim();
+  if (!text || !_supThreadUser) return;
+  inp.value = '';
+  try {
+    await A.req('POST', '/api/support/' + _supThreadUser + '/reply', { text });
+    toast('✓ 已回复,学生端可见');
+    await renderSupThread();
+  } catch(e) { toast('发送失败:' + e.message); }
+}
+
+/* ============ API 客户端 (复用 db.js 里的 window.A) ============ */
+// db.js 通过 <script src="db.js"> 加载,已经把 window.A 设好
+// admin.html 这里只用 A.req / A.username 等访问 db.js 的 API
+
+/* ============ 🎯 线索管理 ============ */
+let _leadsCache = [];    // 原始全部
+let _leadsView  = [];    // 过滤后展示
+let _leadsStats = {};
+
+async function renderLeadsTab(){
+  await loadLeads();
+}
+
+async function loadLeads(){
+  const data = await A.req('GET', '/api/leads');
+  if(!data) { toast('请先登录'); return; }
+  _leadsCache = data.list || [];
+  _leadsStats = data.stats || {};
+  // 统计卡
+  $('leadsStats').innerHTML = `
+    <div class="csg-item"><div class="csg-n">${_leadsStats.total||0}</div><div class="csg-l">总线索数</div></div>
+    <div class="csg-item"><div class="csg-n" style="color:#2563EB">${_leadsStats.students||0}</div><div class="csg-l">学生账号</div></div>
+    <div class="csg-item"><div class="csg-n" style="color:#10B981">${_leadsStats.phones||0}</div><div class="csg-l">已留手机号</div></div>
+    <div class="csg-item"><div class="csg-n" style="color:#EA580C">${_leadsStats.withIntent||0}</div><div class="csg-l">🔥 有咨询意向</div></div>
+    <div class="csg-item"><div class="csg-n" style="color:#F59E0B">${_leadsStats.pending||0}</div><div class="csg-l">🟡 待跟进</div></div>
+    <div class="csg-item"><div class="csg-n" style="color:#059669">${_leadsStats.contacted||0}</div><div class="csg-l">📞 已联系</div></div>
+  `;
+  $('nLeads').textContent = _leadsStats.pending || 0;
+  filterLeads();
+}
+
+function filterLeads(){
+  const q = ($('leadSearch').value||'').toLowerCase().trim();
+  const role = $('leadRole').value;
+  const status = $('leadStatus').value;
+  const intentOnly = $('leadIntentOnly') && $('leadIntentOnly').checked;
+  _leadsView = _leadsCache.filter(l => {
+    if (role !== 'all' && l.role !== role) return false;
+    if (status !== 'all' && l.status !== status) return false;
+    if (intentOnly && !l.hasIntent) return false;
+    if (q) {
+      const hay = (l.username+' '+(l.nickname||'')+' '+(l.phone||'')).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  renderLeadsList();
+}
+
+function renderLeadsList(){
+  $('leadsCount').textContent = `${_leadsView.length} 人 / 共 ${_leadsStats.total||0}`;
+  if (_leadsView.length === 0) {
+    $('leadsList').innerHTML = '<div class="empty"><div class="e-ic">🎯</div><div class="e-t">暂无线索</div><div class="e-s">还没有注册账号,或者筛选条件下无结果</div></div>';
+    return;
+  }
+  $('leadsList').innerHTML = _leadsView.map(l => leadRowHTML(l)).join('');
+}
+
+function leadRowHTML(l){
+  const un = l.username || 'unknown';
+  const statusBadge = {
+    pending:   '<span class="tag pending" style="background:#FEF3C7;color:#92400E">🟡 待跟进</span>',
+    contacted: '<span class="tag" style="background:#DBEAFE;color:#1E40AF">📞 已联系</span>',
+    closed:    '<span class="tag" style="background:#D1FAE5;color:#065F46">✅ 已成交/关闭</span>'
+  }[l.status] || '<span class="tag pending">待跟进</span>';
+  const roleBadge = l.role === 'teacher'
+    ? '<span class="tag" style="background:#FAE8FF;color:#6B21A8">👨‍🏫 教师</span>'
+    : '<span class="tag math">🎓 学生</span>';
+  const phoneLink = l.phone
+    ? `<a href="tel:${l.phone}" class="lead-phone" onclick="event.stopPropagation()">📞 ${l.phone}</a>`
+    : '<span style="color:var(--muted);font-size:11.5px">未登记</span>';
+  const lastLogin = l.lastLoginAt ? '· 上次活跃 ' + formatTime(l.lastLoginAt) : '· 尚未登录过';
+  const noteText = l.note ? `📝 ${escapeHtml(l.note)}` : '<span style="color:var(--muted)">无备注</span>';
+  const operatorText = l.operator && l.updatedAt ? `<span style="color:var(--muted);font-size:10.5px">· ${formatTime(l.updatedAt)} by ${escapeHtml(l.operator)}</span>` : '';
+  // 视奸画像:学习行为 + 咨询意向
+  const profileChips = [];
+  if (l.answerTotal > 0) {
+    profileChips.push(`<span style="background:#EEF0FE;color:#4F46E5;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">✏️ 刷题 ${l.answerTotal} 题</span>`);
+    if (l.accuracy !== null) {
+      const accColor = l.accuracy >= 80 ? '#10B981' : l.accuracy >= 60 ? '#F59E0B' : '#EF4444';
+      profileChips.push(`<span style="background:#F8F9FE;color:${accColor};padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">正确率 ${l.accuracy}%</span>`);
+    }
+    if (l.lastAnswerAt) profileChips.push(`<span style="background:#F8F9FE;color:#6B7280;padding:2px 8px;border-radius:6px;font-size:11px">最近答题 ${formatTime(l.lastAnswerAt)}</span>`);
+  } else {
+    profileChips.push(`<span style="background:#F3F4F6;color:#9CA3AF;padding:2px 8px;border-radius:6px;font-size:11px">还没有刷题记录</span>`);
+  }
+  let intentBadge = '';
+  if (l.hasIntent) {
+    const intentNames = { contact_teacher:'咨询老师', feedback:'反馈', sponsor:'赞助页' };
+    const chips = (l.intentTypes||[]).map(t => intentNames[t] || t).join(' / ');
+    intentBadge = `<div style="margin-top:6px;display:inline-flex;align-items:center;gap:6px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:5px 10px">
+      <span style="font-size:12px;color:#9A3412;font-weight:600">🔥 有意向:${chips}</span>
+      ${l.lastIntentAt ? `<span style="font-size:10.5px;color:#C2410C">${formatTime(l.lastIntentAt)}</span>` : ''}
+    </div>`;
+  }
+  return `
+    <div class="lead-row" data-user="${escapeHtml(l.username)}" style="display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:#fff;transition:all .15s;${l.hasIntent ? 'border-color:#FDBA74;' : ''}" onmouseover="this.style.borderColor='var(--indigo)'" onmouseout="this.style.borderColor='${l.hasIntent ? '#FDBA74' : 'var(--line)'}'">
+      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C6CF0);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${l.avatar || (un[0] || '?').toUpperCase()}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+          <span style="font-size:14.5px;font-weight:600;color:var(--text)">${escapeHtml(l.nickname||l.username)}</span>
+          <span style="color:var(--muted);font-size:12px">@${escapeHtml(l.username)}</span>
+          ${roleBadge}
+          ${statusBadge}
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--text)">
+          ${phoneLink}
+          <span style="color:var(--muted);font-size:11.5px">注册 ${formatTime(l.joinedAt)} ${lastLogin}</span>
+        </div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+          ${profileChips.join('')}
+        </div>
+        ${intentBadge}
+        <div style="margin-top:6px;font-size:12px;color:var(--text);line-height:1.5">
+          ${noteText} ${operatorText}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;flex-direction:column">
+        <button class="btn sm" onclick="event.stopPropagation();openLeadDetail('${l.username}')">📝 编辑</button>
+        ${l.phone ? `<button class="btn sm ghost" onclick="event.stopPropagation();adminCopyText('${l.phone}','手机号')">📋 复制</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+async function openLeadDetail(username){
+  const lead = await A.req('GET', '/api/leads/' + username);
+  if(!lead) { toast('线索不存在'); return; }
+  const statusOpts = [
+    ['pending','🟡 待跟进'],
+    ['contacted','📞 已联系'],
+    ['closed','✅ 已成交/关闭']
+  ].map(([v,t])=>`<option value="${v}" ${lead.status===v?'selected':''}>${t}</option>`).join('');
+  const body = `
+    <div style="margin-bottom:14px">
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px">${escapeHtml(lead.nickname||lead.username)}</div>
+      <div style="font-size:11.5px;color:var(--muted)">@${escapeHtml(lead.username)} · 注册于 ${formatTime(lead.joinedAt)}</div>
+    </div>
+    <label>状态</label>
+    <select id="ld-status">${statusOpts}</select>
+    <label>备注(销售跟进记录、咨询科目、意向等)</label>
+    <textarea id="ld-note" rows="4" style="width:100%;font-family:inherit;font-size:13px;padding:10px;border:1.5px solid var(--line);border-radius:8px;resize:vertical">${escapeHtml(lead.note||'')}</textarea>
+    <div style="display:flex;gap:10px;margin-top:10px;font-size:12.5px;color:var(--text);background:#F8F9FE;padding:10px;border-radius:8px">
+      <div><b>手机号:</b> ${lead.phone ? `<a href="tel:${lead.phone}" style="color:var(--indigo)">${lead.phone}</a>` : '<span style="color:var(--muted)">未登记</span>'}</div>
+      <div><b>角色:</b> ${lead.role==='teacher'?'教师':'学生'}</div>
+    </div>
+  `;
+  showModal('编辑线索', body,
+    `<button class="btn ghost" onclick="closeModal()">取消</button>
+     <button class="btn danger" onclick="deleteLead('${lead.username}')" style="margin-right:auto">🗑 删除线索</button>
+     <button class="btn" onclick="saveLead('${lead.username}')">保存</button>`);
+}
+
+async function saveLead(username){
+  const status = $('ld-status').value;
+  const note = $('ld-note').value.trim();
+  await A.req('POST', '/api/leads/' + username + '/status', { status });
+  await A.req('POST', '/api/leads/' + username + '/note',   { note });
+  toast('✅ 已保存');
+  closeModal();
+  await loadLeads();
+}
+
+async function deleteLead(username){
+  if(!confirm('确认从线索库移除该线索?\n(账号本身不会被删除,只是从线索列表移除)')) return;
+  await A.req('DELETE', '/api/leads/' + username);
+  toast('已移除');
+  closeModal();
+  await loadLeads();
+}
+
+function exportLeadsCSV(){
+  const intentNames = { contact_teacher:'咨询老师', feedback:'反馈', sponsor:'赞助页' };
+  const rows = [['用户名','昵称','手机号','角色','状态','优先级','注册时间','上次活跃','刷题数','正确率%','最近答题','咨询意向','最近意向','备注','跟进人']];
+  for(const l of _leadsCache){
+    rows.push([
+      l.username,
+      l.nickname || '',
+      l.phone || '',
+      l.role === 'teacher' ? '教师' : '学生',
+      {pending:'待跟进',contacted:'已联系',closed:'已成交/关闭'}[l.status] || '待跟进',
+      {high:'高',normal:'普通'}[l.priority] || '普通',
+      l.joinedAt ? new Date(l.joinedAt).toLocaleString('zh-CN') : '',
+      l.lastLoginAt ? new Date(l.lastLoginAt).toLocaleString('zh-CN') : '',
+      l.answerTotal || 0,
+      l.accuracy === null || l.accuracy === undefined ? '' : l.accuracy,
+      l.lastAnswerAt ? new Date(l.lastAnswerAt).toLocaleString('zh-CN') : '',
+      (l.intentTypes||[]).map(t => intentNames[t] || t).join(' / '),
+      l.lastIntentAt ? new Date(l.lastIntentAt).toLocaleString('zh-CN') : '',
+      (l.note || '').replace(/\n/g, ' '),
+      l.operator || ''
+    ]);
+  }
+  const csv = '\ufeff' + rows.map(r => r.map(cell => {
+    const s = String(cell == null ? '' : cell);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }).join(',')).join('\n');
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `leads-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast(`✅ 已导出 ${_leadsCache.length} 条线索`);
+}
+
+function copyAllPhones(){
+  const phones = _leadsCache.filter(l => l.phone).map(l => `${l.nickname||l.username} ${l.phone} (${l.role==='teacher'?'老师':'学生'})`);
+  if(!phones.length){ toast('还没有用户登记手机号'); return; }
+  const text = phones.join('\n');
+  adminCopyText(text, `${phones.length} 个手机号`);
+}
+
+/* ============ 工具 ============ */
+function formatTime(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = (now - d) / 1000;
+  if(diff < 60) return '刚刚';
+  if(diff < 3600) return Math.floor(diff/60) + ' 分钟前';
+  if(diff < 86400) return Math.floor(diff/3600) + ' 小时前';
+  if(diff < 604800) return Math.floor(diff/86400) + ' 天前';
+  return d.toLocaleDateString('zh-CN');
+}
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ===== 资料库 ===== */
+function renderLib(){
+  const lib = loadLib();
+  const el = $('libList');
+  if(!lib.length){
+    el.innerHTML = `<div class="empty"><div class="e-ic">📭</div><div class="e-t">还没有上传资料</div><div class="e-s">点击上方上传区上传第一份 PDF 讲义或真题</div></div>`;
+    return;
+  }
+  el.innerHTML = lib.map((it,idx)=>{
+    const subj = SUBJECTS.find(s=>s.id===it.subject) || SUBJECTS[0];
+    const tags = it.subject ? `<span class="tag ${it.subject}">${subj.name}</span>` : '<span class="tag pending">未分类</span>';
+    return `<div class="lib-item">
+      <div class="li-ic" style="background:${subj.color};color:${subj.cc}">${subj.ic}</div>
+      <div class="li-info">
+        <div class="li-n">${escapeHtml(it.name)}</div>
+        <div class="li-s">${(it.size/1024).toFixed(1)} KB · ${it.pages} 页 · ${new Date(it.uploadedAt).toLocaleString('zh-CN')} ${tags}</div>
+      </div>
+      <div class="li-ops">
+        <select onchange="libChangeSubject(${idx}, this.value)" style="border:1px solid var(--line);border-radius:7px;padding:4px 6px;font-size:11.5px;font-family:inherit">
+          ${SUBJECTS.map(s=>`<option value="${s.id}" ${s.id===it.subject?'selected':''}>${s.ic} ${s.name}</option>`).join('')}
+        </select>
+        <button class="btn sm" onclick="parseFromLib(${idx})">解析</button>
+        <button class="btn sm danger" onclick="delLib(${idx})">删除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.libChangeSubject = (idx, val)=>{
+  const lib = loadLib(); lib[idx].subject = val; saveLib(lib); renderLib(); toast('已变更学科');
+};
+
+window.delLib = (idx)=>{
+  if(!confirm('删除这份资料？已从其解析的题目不会被自动删除。')) return;
+  const lib = loadLib(); lib.splice(idx,1); saveLib(lib); renderLib(); updateCounts(); toast('已删除');
+};
+
+/* ===== 上传 ===== */
+$('uploadZone').addEventListener('dragover', e=>{e.preventDefault(); $('uploadZone').classList.add('dragover');});
+$('uploadZone').addEventListener('dragleave', e=>$('uploadZone').classList.remove('dragover'));
+$('uploadZone').addEventListener('drop', e=>{
+  e.preventDefault(); $('uploadZone').classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+$('libFile').addEventListener('change', e=>{ handleFiles(e.target.files); e.target.value=''; });
+
+async function handleFiles(files){
+  for(const f of files){
+    if(!/\.pdf$/i.test(f.name)){ toast('仅支持 PDF: '+f.name); continue; }
+    if(f.size > 30*1024*1024){ toast('文件超 30MB: '+f.name); continue; }
+    toast('正在解析 '+f.name+' ...');
+    try{
+      const text = await extractPdfText(f);
+      const pages = (text.match(/<<PAGE_BREAK>>/g)||[]).length || 1;
+      const lib = loadLib();
+      lib.unshift({id:_uid(), name:f.name, size:f.size, subject:'math', uploadedAt:Date.now(), pages, text});
+      saveLib(lib);
+      renderLib(); updateCounts();
+      toast('已上传：'+f.name+'（'+pages+' 页）');
+    }catch(err){
+      console.error(err);
+      toast('解析失败：'+f.name+'（可能是扫描件，需要 OCR）');
+    }
+  }
+}
+
+async function extractPdfText(file){
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+  let out = '';
+  for(let i=1;i<=pdf.numPages;i++){
+    const page = await pdf.getPage(i);
+    const tc = await page.getTextContent();
+    const pageText = tc.items.map(it=>it.str).join(' ');
+    out += pageText + '\n<<PAGE_BREAK>>\n';
+  }
+  return out;
+}
+
+/* ===== 解析 ===== */
+function renderParseSrc(){
+  const lib = loadLib();
+  $('parseSrc').innerHTML = '<option value="">— 选择要解析的资料 —</option>' +
+    lib.map(it=>`<option value="${it.id}">${escapeHtml(it.name)} · ${it.pages}页</option>`).join('');
+}
+
+window.parseFromLib = (idx)=>{
+  switchAdminTab('parse');
+  const lib = loadLib();
+  $('parseSrc').value = lib[idx].id;
+  parseSelected();
+};
+
+function parseSelected(){
+  const lib = loadLib();
+  const id = $('parseSrc').value;
+  if(!id){ toast('请先选择一份资料'); return; }
+  const it = lib.find(x=>x.id===id);
+  if(!it){ toast('资料不存在'); return; }
+  $('parseHint').textContent = `正在分析 ${it.name}（${it.pages} 页）...`;
+  setTimeout(()=>{
+    DRAFTS = doParse(it);
+    $('parseHint').textContent = `共发现 ${DRAFTS.length} 道候选题目（人工校对后保存）`;
+    $('parseResultCard').style.display='block';
+    renderParseList();
+    updateCounts();
+  }, 100);
+}
+
+function doParse(it){
+  // 解析策略：
+  //  1) 优先按"题号标记"切题（多模式）
+  //  2) 题干内识别选项 A/B/C/D
+  //  3) 答案单独抽离（"答案：xxx"、"解得 x=N"、"∴ x = "、"answer: N"、"correct: N"）
+  //  4) 解析识别（"解："/"解析："/"∴"/"because"/"proof"）
+  //  5) 单题按 chapter/分值分组（"(P1)" / "Chapter 5" / "[6分]"）
+  const text = it.text || '';
+  const pages = (text.match(/\x0c/g)||[]).length + 1;  // 估算页数
+  // 拆页（按 FF 分页符，无则按"Page N"分段）
+  const pagesArr = text.split(/\x0c|(?=Page\s+\d+)|(?=\f)/);
+  const allQs = [];
+  for(let pi=0; pi<pagesArr.length; pi++){
+    const pageText = pagesArr[pi];
+    // 章节标记
+    const chapM = pageText.match(/(?:Chapter|CHAPTER|第\s*章|\\[P?\d+\\]|P\d|\\P\d)\s*([\d一二三四五六七八九十]+[^\n]{0,40})/);
+    const chapter = chapM ? chapM[1].trim().slice(0,30) : (it.chapter || '未分类');
+    // 题号：4 种格式
+    //   1.    1． / 1. / 1、 / 1) / (1) / Q1 / Question 1
+    const numRe = /(?:\n|\r|^)\s*(?:\(?(\d{1,3})\)?[.\．、)\s]+|(?:Question|Q)[ ]*(\d{1,3})\b)\s*/g;
+    // 行级切分（保留结构）
+    const rawLines = pageText.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+    // 把文本按题号拆成块
+    const blocks = [];
+    let lastIdx = -1, cur = null;
+    for(let i=0;i<rawLines.length;i++){
+      const ln = rawLines[i];
+      const m = ln.match(/^(?:\((\d{1,3})\)|(\d{1,3})\)|(\d{1,3})\.|(\d{1,3})\、|(?:Question|Q)[ ]+(\d{1,3}))\s+(.*)$/i);
+      if(m){
+        if(cur) blocks.push(cur);
+        cur = {start:i, num:parseInt(m[1]||m[2]||m[3]||m[4]||m[5]), lines:[(m[6]||'').trim()]};
+      } else if(cur){
+        cur.lines.push(ln);
+      }
+    }
+    if(cur) blocks.push(cur);
+    // 题号缺失时兜底：若整页就一段连续文本，尝试按空段落切
+    if(!blocks.length && pageText.trim()){
+      const paras = pageText.split(/\n{2,}/).map(p=>p.trim()).filter(Boolean);
+      paras.forEach((p,idx)=>blocks.push({start:idx, num:idx+1, lines:p.split(/\n+/)}));
+    }
+    // 处理每个 block
+    for(const b of blocks){
+      const merged = b.lines.join('\n');
+      // 抽分值 [6分] / (Total 6 marks) / 6 marks
+      const marksMatch = merged.match(/[\[【\(](\d{1,2})\s*(?:分|mars|marks?|pts?|points?)[\]】\)]/i);
+      const marks = marksMatch ? parseInt(marksMatch[1]) : null;
+      // 抽选项
+      const opts = [];
+      const optRe = /[\(（]?([A-Da-d])[\)）、\.]\s*([^\n]+?)(?=(?:[\(（][A-Da-d][\)）、\.])|$)/g;
+      let om;
+      // 重置 lastIndex
+      const mergedForOpts = merged;
+      const optsOnly = [];
+      while((om = optRe.exec(mergedForOpts)) !== null){
+        const k = om[1].toUpperCase();
+        const v = om[2].trim().replace(/[\s\n]+$/,'').slice(0,120);
+        optsOnly.push({k, v});
+      }
+      // 选项极长或无选项时回退：按 ABCDEF 分别取每行
+      if(optsOnly.length < 2){
+        // 看是否有以 A. B. C. D. 开头的连续行
+        const lineOpts = [];
+        for(const ln of b.lines){
+          const lm = ln.match(/^[\(（]?([A-Da-d])[\)）、\.]\s*(.+)$/);
+          if(lm) lineOpts.push({k:lm[1].toUpperCase(), v:lm[2].trim()});
+        }
+        if(lineOpts.length >= 2) optsOnly.push(...lineOpts);
+      }
+      // 抽题干：去掉选项后的部分
+      let stem = merged;
+      optsOnly.forEach(o=>{
+        // 移除第一次出现的选项行/块
+        const re = new RegExp('[\\(（]?\\s*'+o.k+'[\\)）、\\.]\\s*[^\\n]+(?:\\s*\\n[^\\n]+)*?(?=[\\(（]?[A-Da-d][\\)）、\\.]|$)','i');
+        stem = stem.replace(re, ' ');
+      });
+      // 去掉分值
+      stem = stem.replace(/\[\d+\s*分\]|\(\d+\s*marks?\)|\(\d+\s*pts?\)/gi,' ').trim();
+      // 答案识别
+      let answer = null;
+      const ansPatterns = [
+        /(?:答案|正确答案|标准答案|answer|correct answer|key)\s*[:：=]?\s*\(?([A-Da-d])\)?/i,
+        /[\(（]([A-D])[\)）]\s*(?:是|为|选|为正确答案|is the correct)/,
+        /correct\s*(?:answer|option)?\s*[:：=]?\s*\(?([A-Da-d])\)/i,
+        /∴\s*[^.。\n]*?=\s*\(?([A-Da-d])\)?/,
+        /(?:解得|求得|得)\s*[^.。\n]*?=\s*\(?([A-Da-d])\)?/
+      ];
+      for(const re of ansPatterns){
+        const am = merged.match(re);
+        if(am){ answer = am[1].toUpperCase(); break; }
+      }
+      // 解析抽取：找到 "解：" 之后的连续块
+      let exp = '';
+      const expM = merged.match(/(?:解：?|解析：?|解\s*[：:]\s*|analysis|solution|proof|解析)\s*([^\n]+(?:[\s\S]*?)(?=\n\s*\n|[\(（][A-Da-d][\)）、\.]|$))/i);
+      if(expM) exp = expM[1].trim().slice(0,400);
+      // 类型识别
+      const hasFillBlank = /（\s*[\_\-]\s*）|\(\s*[\_]\s*\)|_____/i.test(merged);
+      const hasProof = /(?:证明|prove|show that)/i.test(merged);
+      let type = 'example';
+      if(hasProof) type = 'proof';
+      else if(hasFillBlank) type = 'fill';
+      else if(/exam|past\s*paper|M(?:20)?\d{2}|J(?:20)?\d{2}|S(?:20)?\d{2}/i.test(merged)) type = 'exam';
+      else if(it.type === 'exam') type = 'exam';
+      // 题目太短或全是选项就跳过
+      const cleanStem = stem.replace(/\s+/g,' ').trim();
+      if(cleanStem.length < 4) continue;
+      allQs.push({
+        id:_uid(),
+        subject:it.subject || 'math',
+        chapter,
+        type,
+        num:b.num,
+        marks,
+        q:cleanStem.slice(0,500),
+        opts:optsOnly.slice(0,6).map(o=>o.v),
+        a: answer || (optsOnly[0] ? optsOnly[0].k : null),
+        exp: exp.trim().slice(0,400),
+        hint:'',
+        translation:'',
+        translated:false,
+        published:false,
+        source: it.name || '',
+        page: pi+1,
+        addedAt: Date.now()
+      });
+    }
+  }
+  // 去重：相同 q 文本只保留一条
+  const seen = new Set();
+  const uniq = [];
+  for(const q of allQs){
+    const k = q.q.slice(0,80);
+    if(seen.has(k)) continue;
+    seen.add(k);
+    uniq.push(q);
+  }
+  return uniq;
+}
+function _parseLegacy(it){
+  const lines = (it.text||'').split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  const numRe = /^\s*\(?(\d{1,3})\)?[\.\．、\)\s]\s*/;
+  const out = [];
+  let cur = null;
+  for(const ln of lines){
+    const m = ln.match(numRe);
+    if(m){
+      if(cur && cur.stem.length>5) _finalizeLegacy(cur, out, it);
+      cur = {num:parseInt(m[1]), stem:ln.replace(numRe,'').trim(), opts:[], a:null, exp:'', hint:[]};
+    } else if(cur){
+      const om = ln.match(/^[\(（]?([A-Da-d])[\)\）\.\、\s]\s*(.+)$/);
+      if(om) cur.opts.push({k:om[1].toUpperCase(), v:om[2].trim()});
+      else if(/^(答案|answer|sol|解|解：|答：|答:|解析)/i.test(ln)) cur.exp += (cur.exp?'\n':'')+ln;
+      else if(/^(hint|提示|formula|公式)/i.test(ln)) cur.hint.push(ln);
+      else cur.stem += ' '+ln;
+    }
+  }
+  if(cur && cur.stem.length>5) _finalizeLegacy(cur, out, it);
+  return out;
+}
+function _finalizeLegacy(cur, out, it){
+  const exp = cur.exp || '';
+  let a = cur.a;
+  const am = exp.match(/[答案是答\s]*[:：]?\s*\(?([A-Da-d])\)?[\.，,\s]/) || exp.match(/\b([A-D])\b\s*is\s*(?:the\s*)?(?:correct|answer)/i);
+  if(am) a = am[1].toUpperCase();
+  if(a==null && cur.opts.length>=2) a = cur.opts[0].k;
+  out.push({
+    id:_uid(), subject:it.subject||'math', chapter:'未分类', type:'example',
+    num:cur.num, q:cur.stem.replace(/\s+/g,' ').trim().slice(0,500),
+    opts:cur.opts.slice(0,4).map(o=>o.v), a,
+    exp:cur.exp.trim().slice(0,300), hint:cur.hint.join(' | ').slice(0,200),
+    translation:'', translated:false, published:false,
+    source:it.name||'', addedAt:Date.now()
+  });
+}
+
+function renderParseList(){
+  $('parseStat').textContent = `共 ${DRAFTS.length} 条草稿 · 可在下方逐题校对后保存`;
+  $('parseList').innerHTML = DRAFTS.map((q,idx)=>`<div class="q-edit">
+    <div class="qe-row"><div class="lbl">题干</div><textarea data-f="q" data-i="${idx}" oninput="updateDraft(${idx},'q',this.value)">${escapeHtml(q.q)}</textarea></div>
+    <div class="qe-row"><div class="lbl">选项</div><div class="qe-opts">${(q.opts||[]).map((o,k)=>`<div class="qo"><input type="radio" name="dr-${idx}" ${k===0?'checked':''} onchange="updateDraft(${idx},'a',${k})"><input class="oi" type="text" value="${escapeHtml(o)}" oninput="updateDraftOpt(${idx},${k},this.value)"></div>`).join('')}<div class="qo" style="margin-top:4px"><span style="font-size:11.5px;color:var(--muted)">→ 当前正确答案：${'ABCD'[q.a]||'-'}</span></div></div></div>
+    <div class="qe-row"><div class="lbl">类型</div><select data-f="type" onchange="updateDraft(${idx},'type',this.value)" style="flex:1"><option value="example" ${q.type==='example'?'selected':''}>例题（需要翻译）</option><option value="exam" ${q.type==='exam'?'selected':''}>真题（可不译）</option></select></div>
+    <div class="qe-tr"><div class="qe-row"><div class="lbl">解析</div><textarea oninput="updateDraft(${idx},'exp',this.value)">${escapeHtml(q.exp||'')}</textarea></div>
+      <div class="qe-row"><div class="lbl">中文翻译</div><textarea placeholder="题目中文翻译（例题必填，真题可选）" oninput="updateDraft(${idx},'translation',this.value)">${escapeHtml(q.translation||'')}</textarea></div></div>
+    <div class="qe-foot">
+      <span class="status">第 ${q.num} 题 · ${q.opts.length} 选项</span>
+      <div class="ops"><button class="btn sm" onclick="saveOneDraft(${idx})">保存为正式题</button><button class="btn sm ghost" onclick="discardDraft(${idx})">丢弃</button></div>
+    </div>
+  </div>`).join('');
+}
+
+window.updateDraft = (idx, field, val)=>{
+  if(field==='a'){ DRAFTS[idx].a = val; return; }
+  DRAFTS[idx][field] = val;
+};
+window.updateDraftOpt = (idx, k, val)=>{ if(DRAFTS[idx].opts) DRAFTS[idx].opts[k] = val; };
+window.saveOneDraft = (idx)=>{
+  const d = DRAFTS[idx];
+  const lib = loadLib();
+  const src = lib.find(x=>x.id === $('parseSrc').value);
+  d.source = src ? src.name : '';
+  d.subject = src?.subject || 'math';
+  d.translated = !!d.translation;
+  const bank = loadBank();
+  bank.unshift(d);
+  saveBank(bank);
+  DRAFTS.splice(idx,1);
+  renderParseList();
+  updateCounts();
+  renderTrSubject();
+  toast('已保存并投放学科：'+SUBJECTS.find(s=>s.id===d.subject)?.name);
+};
+window.discardDraft = (idx)=>{ DRAFTS.splice(idx,1); renderParseList(); updateCounts(); };
+window.saveAllDrafts = ()=>{
+  if(!DRAFTS.length) return;
+  const lib = loadLib();
+  const src = lib.find(x=>x.id === $('parseSrc').value);
+  const bank = loadBank();
+  DRAFTS.forEach(d=>{
+    d.source = src ? src.name : '';
+    d.subject = src?.subject || 'math';
+    d.translated = !!d.translation;
+    bank.unshift(d);
+  });
+  saveBank(bank);
+  DRAFTS = [];
+  renderParseList();
+  updateCounts();
+  renderTrSubject();
+  toast('已保存 '+DRAFTS.length+' 道题');
+};
+window.clearDrafts = ()=>{ DRAFTS=[]; renderParseList(); updateCounts(); };
+
+/* ===== 学科管理 ===== */
+function renderSubjectGrid(){
+  const bank = loadBank();
+  $('subjectGrid').innerHTML = SUBJECTS.map(s=>{
+    const n = bank.filter(q=>q.subject===s.id).length;
+    return `<div class="subject-card ${s.id===CURRENT_SUBJECT?'active':''}" onclick="pickSubject('${s.id}')">
+      <div class="sc-ic" style="background:${s.color};color:${s.cc}">${s.ic}</div>
+      <div class="sc-n">${s.name}</div>
+      <div class="sc-s">${s.en}</div>
+      <div class="sc-num">${n} 道题</div>
+    </div>`;
+  }).join('');
+}
+
+window.pickSubject = (id)=>{
+  CURRENT_SUBJECT = id;
+  renderSubjectGrid();
+  renderSubjectQs();
+};
+
+function renderSubjectQs(){
+  const card = $('subjectQs');
+  if(!CURRENT_SUBJECT){ card.style.display='none'; return; }
+  card.style.display='block';
+  const subj = SUBJECTS.find(s=>s.id===CURRENT_SUBJECT);
+  $('subjectTitle').textContent = subj.name + ' · 题库';
+  const bank = loadBank().filter(q=>q.subject===CURRENT_SUBJECT);
+  if(!bank.length){
+    $('subjectQList').innerHTML = `<div class="empty"><div class="e-ic">📝</div><div class="e-t">该学科还没有题目</div><div class="e-s">去「资料库」上传 PDF → 「题目解析」自动提取</div></div>`;
+    return;
+  }
+  $('subjectQList').innerHTML = bank.map((q,idx)=>qItemHtml(q, idx, 'bank')).join('');
+}
+
+function qItemHtml(q, idx, source){
+  const isTr = !!q.translation;
+  return `<div class="q-edit">
+    <div class="qe-row"><div class="lbl">题干</div><div style="flex:1;font-size:13px;line-height:1.6">${escapeHtml(q.q)}</div></div>
+    <div class="qe-row"><div class="lbl">选项</div><div class="qe-opts">${(q.opts||[]).map((o,k)=>`<div class="qo"><span style="font-size:12px;color:${k===q.a?'#10B981':'var(--muted)'};font-weight:600;width:16px">${'ABCD'[k]}</span><span style="font-size:12.5px">${escapeHtml(o)}</span></div>`).join('') || '<span style="color:var(--faint)">（无）</span>'}</div></div>
+    <div class="qe-row"><div class="lbl">答案</div><div style="flex:1;font-size:13px;color:#10B981;font-weight:600">${'ABCD'[q.a]||'-'}</div></div>
+    ${q.exp?`<div class="qe-row"><div class="lbl">解析</div><div style="flex:1;font-size:12.5px;color:#475569;line-height:1.6">${escapeHtml(q.exp)}</div></div>`:''}
+    <div class="qe-row"><div class="lbl">翻译</div><div style="flex:1;font-size:12.5px;color:${isTr?'#065F46':'#B91C1C'};line-height:1.6">${isTr?escapeHtml(q.translation):'<em>（未翻译）</em>'}</div></div>
+    <div class="qe-foot">
+      <span class="status">
+        <span class="tag ${q.subject}">${SUBJECTS.find(s=>s.id===q.subject)?.name||q.subject}</span>
+        <span class="tag ${q.type==='example'?(isTr?'translated':'pending'):'unpublished'}" style="margin-left:4px">${q.type==='example'?(isTr?'已翻译':'待翻译'):'真题'}</span>
+        <span class="tag ${q.published?'ok':'unpublished'}" style="margin-left:4px">${q.published?'已投放':'未投放'}</span>
+        ${q.source?`· ${escapeHtml(q.source)}`:''}
+      </span>
+      <div class="ops">
+        <button class="btn sm ghost" onclick="editQ('${source}','${q.id}')">编辑</button>
+        <button class="btn sm ${q.published?'danger':'ok'}" onclick="togglePub('${q.id}')">${q.published?'下架':'投放'}</button>
+        <button class="btn sm danger" onclick="delQ('${q.id}')">删除</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+window.togglePub = (id)=>{
+  const bank = loadBank();
+  const q = bank.find(x=>x.id===id);
+  if(!q) return;
+  // 例题必须有翻译才能投放
+  if(!q.published && q.type==='example' && !q.translation){
+    toast('例题必须有中文翻译才能投放'); return;
+  }
+  q.published = !q.published;
+  saveBank(bank);
+  renderSubjectQs(); renderPubList(); renderTrSubject(); updateCounts();
+  toast(q.published?'已投放，学生端可见':'已下架');
+};
+
+window.delQ = (id)=>{
+  if(!confirm('确定删除该题？')) return;
+  const bank = loadBank().filter(x=>x.id!==id);
+  saveBank(bank);
+  renderSubjectQs(); renderPubList(); renderTrSubject(); updateCounts();
+  toast('已删除');
+};
+
+window.editQ = (source, id)=>{
+  const bank = loadBank();
+  const q = bank.find(x=>x.id===id);
+  if(!q) return;
+  showModal('编辑题目', `
+    <label>题干</label><textarea id="mq_q" style="min-height:80px">${escapeHtml(q.q)}</textarea>
+    <label>选项（每行一个）</label><textarea id="mq_opts" style="min-height:100px">${(q.opts||[]).map(escapeHtml).join('\n')}</textarea>
+    <label>正确答案</label>
+    <select id="mq_a">
+      ${[0,1,2,3].map(k=>`<option value="${k}" ${k===q.a?'selected':''}>${'ABCD'[k]}</option>`).join('')}
+    </select>
+    <label>类型</label>
+    <select id="mq_type">
+      <option value="example" ${q.type==='example'?'selected':''}>例题（需翻译）</option>
+      <option value="exam" ${q.type==='exam'?'selected':''}>真题（可不译）</option>
+    </select>
+    <label>解析</label><textarea id="mq_exp" style="min-height:60px">${escapeHtml(q.exp||'')}</textarea>
+    <label>中文翻译</label><textarea id="mq_tr" style="min-height:60px" placeholder="例题必填 · 真题可选">${escapeHtml(q.translation||'')}</textarea>
+  `, `<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="saveEditQ('${id}')">保存</button>`);
+};
+
+window.saveEditQ = (id)=>{
+  const bank = loadBank();
+  const q = bank.find(x=>x.id===id);
+  if(!q) return;
+  q.q = $('mq_q').value.trim();
+  q.opts = $('mq_opts').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  q.a = parseInt($('mq_a').value);
+  q.type = $('mq_type').value;
+  q.exp = $('mq_exp').value.trim();
+  q.translation = $('mq_tr').value.trim();
+  q.translated = !!q.translation;
+  saveBank(bank);
+  closeModal();
+  renderSubjectQs(); renderPubList(); renderTrSubject(); updateCounts();
+  toast('已保存');
+};
+
+window.addManualQ = ()=>{
+  const subj = CURRENT_SUBJECT;
+  const bank = loadBank();
+  const q = {id:_uid(), subject:subj, chapter:'未分类', type:'example', num:1, q:'', opts:['选项A','选项B','选项C','选项D'], a:0, exp:'', hint:'', translation:'', translated:false, published:false, source:'手工添加', addedAt:Date.now()};
+  bank.unshift(q);
+  saveBank(bank);
+  renderSubjectQs(); renderPubList(); renderTrSubject(); updateCounts();
+  setTimeout(()=>editQ('bank', q.id), 100);
+};
+
+/* ===== 翻译工作台 ===== */
+function renderTrSubject(){
+  $('trSubject').innerHTML = SUBJECTS.map(s=>`<option value="${s.id}" ${s.id===CURRENT_SUBJECT?'selected':''}>${s.ic} ${s.name}</option>`).join('');
+  renderTranslateList();
+}
+
+function renderTranslateList(){
+  const subj = $('trSubject').value;
+  const type = $('trType').value;
+  let list = loadBank().filter(q=>q.subject===subj);
+  if(type==='pending') list = list.filter(q=>!q.translation);
+  else if(type==='done') list = list.filter(q=>q.translation);
+  if(!list.length){
+    $('translateList').innerHTML = `<div class="empty"><div class="e-ic">🌐</div><div class="e-t">没有待翻译的题目</div><div class="e-s">例题自动加入此处 · 翻译后才能投放给学生端</div></div>`;
+    return;
+  }
+  $('translateList').innerHTML = list.map((q,idx)=>`<div class="q-edit">
+    <div class="qe-row"><div class="lbl">题干</div><div style="flex:1;font-size:13px;line-height:1.6">${escapeHtml(q.q)}</div></div>
+    <div class="qe-row"><div class="lbl">翻译</div><textarea id="trtxt-${q.id}" oninput="autoSaveTr('${q.id}', this.value)" style="min-height:70px" placeholder="请填写中文翻译...">${escapeHtml(q.translation||'')}</textarea></div>
+    <div class="qe-foot">
+      <span class="status">
+        <span class="tag ${q.translation?'translated':'pending'}">${q.translation?'✓ 已翻译':'待翻译'}</span>
+        ${q.source?` · ${escapeHtml(q.source)}`:''}
+      </span>
+      <div class="ops">
+        <button class="btn sm" onclick="saveTr('${q.id}')">保存翻译</button>
+      </div>
+    </div>
+  </div>`).join('');
+}
+
+const _trTimer = {};
+window.autoSaveTr = (id, val)=>{
+  clearTimeout(_trTimer[id]);
+  _trTimer[id] = setTimeout(()=>saveTr(id, true), 600);
+};
+
+window.saveTr = (id, silent)=>{
+  const bank = loadBank();
+  const q = bank.find(x=>x.id===id);
+  if(!q) return;
+  const v = $('trtxt-'+id).value.trim();
+  q.translation = v;
+  q.translated = !!v;
+  saveBank(bank);
+  updateCounts();
+  if(!silent) toast('已保存翻译');
+  renderTrSubject();
+};
+
+/* ===== 已投放 ===== */
+function renderPubList(){
+  const list = loadBank().filter(q=>q.published);
+  if(!list.length){
+    $('pubList').innerHTML = `<div class="empty"><div class="e-ic">📦</div><div class="e-t">还没有投放的题目</div><div class="e-s">在学科管理里点「投放」后会在此处显示</div></div>`;
+    return;
+  }
+  $('pubList').innerHTML = list.map((q,idx)=>qItemHtml(q, idx, 'bank')).join('');
+}
+
+/* ===== Helpers ===== */
+function escapeHtml(s){ return (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function toast(msg, ms=1800){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('show'), ms);
+}
+function showModal(title, body, actions){
+  $('modalTitle').textContent = title;
+  $('modalBody').innerHTML = body;
+  $('modalActions').innerHTML = actions;
+  $('modalMask').classList.add('show');
+}
+function closeModal(){ $('modalMask').classList.remove('show'); }
+
+/* ===== Boot ===== */
+window.addEventListener('DOMContentLoaded', ()=>{
+  // 已有 session 则自动登录（不再强制每次重新登录）
+  const acc = loadAccounts();
+  const ses = getSession();
+  if(ses && acc.users[ses]){ // 有会话即可恢复;教师端 URL 未公开,能登录即视为教师
+    ADMIN = ses;
+    // 确保 API 层鉴权态完整(旧版本登录可能没写 token → 线索/客服等接口全部 401)
+    try{
+      if(!localStorage.getItem('almath_user')) localStorage.setItem('almath_user', ses);
+      if(!localStorage.getItem('almath_token')) localStorage.setItem('almath_token', 'boot-' + ses + '-' + Date.now());
+      localStorage.setItem('almath_role', 'teacher');
+    }catch(e){}
+    $('loginPage').style.display = 'none';
+    $('app').style.display = 'block';
+    $('tdUname').textContent = ADMIN;
+    initAll();
+    return;
+  }
+  $('loginPage').style.display = 'flex';
+  $('app').style.display = 'none';
+  showLoginTab('login');
+  renderExistingAccounts();
+});
+
+function getSession(){
+  try{ return localStorage.getItem('almath_session') || sessionStorage.getItem('almath_session'); }catch(e){ return null; }
+}
+
+function renderExistingAccounts(){
+  // 登录页显示"已注册账号"列表，方便找回
+  const acc = loadAccounts();
+  const list = $('existingAccounts');
+  if(!list) return;
+  const entries = Object.entries(acc.users)
+    .filter(([u,r])=>r.role==='teacher')
+    .sort((a,b)=>(b[1].createdAt||'').localeCompare(a[1].createdAt||''));
+  if(!entries.length){
+    list.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px 0">还没有任何教师账号</div>';
+    return;
+  }
+  list.innerHTML = '<div style="font-size:11px;color:var(--muted);margin:6px 0">已注册账号（点击填到用户名）</div>' + entries.map(([u,r])=>{
+    const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '';
+    return `<div class="acc-pill" onclick="pickExistingAccount('${u}')">
+      <div class="acc-name">${escapeHtml(u)}</div>
+      <div class="acc-meta">${r.phone?'📱'+r.phone.slice(0,3)+'****'+r.phone.slice(7):'无手机号'} · ${date}</div>
+    </div>`;
+  }).join('');
+}
+
+function pickExistingAccount(u){
+  $('loginUser').value = u;
+  $('loginPass').focus();
+  if(typeof toast==='function') toast('已填入「'+u+'」,请输入密码');
+}
+
+/* ===== 数据备份 / 恢复 ===== */
+function openDataBackup(){
+  const counts = computeDataCounts();
+  showModal('💾 数据备份 / 恢复',
+    `<div style="font-size:12.5px;color:var(--text);line-height:1.7;margin-bottom:14px">
+       所有账号、班级、资料库、题目库都存在浏览器本地（CloudStudio 沙箱重置会清空）。强烈建议<strong>每周导出一次</strong>备份到备忘录，丢了可一键恢复。
+     </div>
+     <div class="backup-stats">
+       <div class="bs-item"><div class="bs-n">${counts.accounts}</div><div class="bs-l">教师账号</div></div>
+       <div class="bs-item"><div class="bs-n">${counts.classes}</div><div class="bs-l">班级</div></div>
+       <div class="bs-item"><div class="bs-n">${counts.lib}</div><div class="bs-l">资料</div></div>
+       <div class="bs-item"><div class="bs-n">${counts.bank}</div><div class="bs-l">题目</div></div>
+     </div>
+     <div class="backup-actions">
+       <button class="btn" onclick="doExport()">📤 一键导出全部数据</button>
+       <button class="btn ghost" onclick="doCopyData()">📋 复制到剪贴板</button>
+       <button class="btn danger" onclick="doImport()">📥 从备份恢复</button>
+     </div>
+     <div class="backup-tip" id="backupTip">
+       💡 提示：恢复时会<strong>覆盖当前数据</strong>。建议先导出当前数据再恢复另一份。
+     </div>
+     <textarea id="backupJson" placeholder="从备忘录粘贴备份 JSON 到这里，然后点击「从备份恢复」" style="display:none"></textarea>`,
+    `<button class="btn ghost" onclick="closeModal()">关闭</button>`);
+}
+
+function computeDataCounts(){
+  return {
+    accounts: Object.keys(loadAccounts().users).length,
+    lib: loadLib().length,
+    bank: loadBank().length
+  };
+}
+
+function snapshotAll(){
+  // 收集所有 localStorage 中相关 key
+  const dump = {
+    _meta: {
+      app:'almath',
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      exportedBy: ADMIN || 'unknown'
+    },
+    accounts: JSON.parse(localStorage.getItem('almath_accounts') || '{}'),
+    leads:    JSON.parse(localStorage.getItem(DB_KEY) ? (JSON.parse(localStorage.getItem(DB_KEY)).leads || {}) : '{}'),
+    lib: JSON.parse(localStorage.getItem('almath_lib') || '[]'),
+    bank: JSON.parse(localStorage.getItem('almath_admin_bank') || '[]'),
+    drafts: JSON.parse(localStorage.getItem('almath_admin_drafts') || '[]'),
+    cloud: JSON.parse(localStorage.getItem(DB_KEY) || '{}')
+  };
+  // 学生数据不打包（用户量大、体积大）。如需请单独用学生端导出
+  return dump;
+}
+
+function doExport(){
+  const dump = snapshotAll();
+  const json = JSON.stringify(dump, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `almath-backup-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('已导出备份文件，请妥善保存');
+}
+
+function doCopyData(){
+  const dump = snapshotAll();
+  const json = JSON.stringify(dump, null, 2);
+  // 同时把 json 填到文本框（用户可以手复制）
+  $('backupJson').style.display = 'block';
+  $('backupJson').value = json;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(json).then(()=>{
+      toast('已复制到剪贴板，请粘贴到备忘录');
+    }).catch(()=>toast('剪贴板不可用 · 请手动复制文本框'));
+  } else {
+    toast('剪贴板不可用 · 请手动复制下方文本框');
+  }
+}
+
+function doImport(){
+  const ta = $('backupJson');
+  ta.style.display = 'block';
+  if(!ta.value.trim()){
+    toast('请先在文本框粘贴备份 JSON');
+    ta.focus();
+    return;
+  }
+  let dump;
+  try{ dump = JSON.parse(ta.value); }catch(e){ toast('JSON 格式错误：'+e.message); return; }
+  if(!dump._meta || dump._meta.app !== 'almath'){
+    if(!confirm('这不是 almath 备份文件，是否仍然尝试导入？')) return;
+  }
+  if(!confirm('导入将覆盖当前的「所有账号 / 资料 / 题目 / 线索标记」。确认要恢复吗?')) return;
+  // 写回 localStorage
+  if(dump.accounts) localStorage.setItem('almath_accounts', JSON.stringify(dump.accounts));
+  if(dump.lib) localStorage.setItem('almath_lib', JSON.stringify(dump.lib));
+  if(dump.bank) localStorage.setItem('almath_admin_bank', JSON.stringify(dump.bank));
+  if(dump.drafts) localStorage.setItem('almath_admin_drafts', JSON.stringify(dump.drafts));
+  if(dump.cloud) localStorage.setItem(DB_KEY, JSON.stringify(dump.cloud));
+  closeModal();
+  updateCounts();
+  toast('数据已恢复');
+  setTimeout(()=>location.reload(), 800);
+}
+</script>
+</body>
+</html>
