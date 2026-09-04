@@ -1,9 +1,9 @@
-# 题练通 ExamPrep
+# ALmatchtool
 
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-222?logo=github)](https://steven-hjj.github.io/almath)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> 面向在线考试刷题场景的双端应用：**学生端**用手机/电脑刷题，**教师端**用电脑出题与管理。
+> 面向 Edexcel AL 数学考试刷题场景的双端应用：**学生端**用手机/电脑刷题，**教师端**用电脑出题与管理。
 
 ---
 
