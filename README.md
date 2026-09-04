@@ -12,9 +12,9 @@
 | 入口 | 地址 | 说明 |
 |------|------|------|
 | 学生端 | [https://steven-hjj.github.io/almath](https://steven-hjj.github.io/almath) | 刷题、每日挑战、错题本、模拟考试 |
-| 教师端 | [https://steven-hjj.github.io/almath/admin](https://steven-hjj.github.io/almath/admin) | 上传资料、解析 PDF、快速出题、投放题目 |
+| 教师端 | （不对外公开） | 上传资料、解析 PDF、快速出题、投放题目 |
 
-> 提示：请使用上述 `https://` 线上地址访问，**不要双击本地 HTML 文件打开**，否则会出现数据不同步等兼容性问题。如遇页面显示异常，请按 `Ctrl + Shift + R`（Windows）或 `Cmd + Shift + R`（Mac）硬刷新。
+> 提示：请使用 `https://` 线上地址访问学生端，**不要双击本地 HTML 文件打开**，否则会出现数据不同步等兼容性问题。如遇页面显示异常，请按 `Ctrl + Shift + R`（Windows）或 `Cmd + Shift + R`（Mac）硬刷新。
 
 ---
 
@@ -39,7 +39,7 @@
 ## 快速开始
 
 1. 打开 [学生端](https://steven-hjj.github.io/almath) 开始刷题。
-2. 教师打开 [教师端](https://steven-hjj.github.io/almath/admin)，进入「资料库」上传 PDF 或「题目解析」粘贴文本出题。
+2. 教师通过私有入口进入教师端，在「资料库」上传 PDF 或在「题目解析」粘贴文本出题。
 3. 校对题目后点击「全部保存到题库」，再进入「已发布」投放到学生端。
 
 ---
