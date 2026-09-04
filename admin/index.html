@@ -285,9 +285,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
       <h1>教师后台</h1>
       <p>上传资料 · 自动解析 · 翻译题目 · 投入学生端</p>
     </div>
-    <div class="login-tabs">
-      <div class="login-tab active" data-tab="login" onclick="showLoginTab('login')">登录</div>
-      <div class="login-tab" data-tab="register" onclick="showLoginTab('register')">注册新教师</div>
+    <div style="text-align:center;margin-bottom:18px">
+      <div class="login-tab active" style="display:inline-block;padding:8px 22px;border-radius:9px;background:#fff;color:var(--text);font-size:12.5px;font-weight:700;box-shadow:0 1px 4px rgba(30,27,50,.08)">教师登录</div>
     </div>
     <div id="ltab-login">
       <div class="lf"><label>用户名（中文 / 英文）</label><input id="loginUser" placeholder="例：edexcel2026" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
@@ -295,15 +294,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
       <div id="loginErr" class="lerr" style="display:none"></div>
       <button class="login-btn" onclick="doAdminLogin()">登 录</button>
     </div>
-    <div id="ltab-register" style="display:none">
-      <div class="lf"><label>用户名（中英文 · 不可重复）</label><input id="regUser" placeholder="例：张老师 / MrsZhang"></div>
-      <div class="lf"><label>手机号（找回账号用）</label><input id="regPhone" type="tel" maxlength="11" placeholder="11 位 1 开头"></div>
-      <div class="lf"><label>密码</label><input id="regPass" type="password" placeholder="≥6 位 · 含大小写字母"></div>
-      <div class="lf"><label>确认密码</label><input id="regPass2" type="password" onkeydown="if(event.key==='Enter')doAdminRegister()"></div>
-      <div id="regErr" class="lerr" style="display:none"></div>
-      <button class="login-btn" onclick="doAdminRegister()">注 册</button>
-    </div>
-    <div class="lnote">登录后默认角色为「教师」，可上传资料、维护题库。已注册的教师账号与学生端账号是同一套体系。</div>
+    <div class="lnote">教师账号由管理员单独开通，暂不开放自助注册。如需使用教师端，请联系管理员获取账号。</div>
     <div class="acc-list" id="existingAccounts"></div>
   </div>
 </div>
@@ -627,13 +618,11 @@ function validP(p){
   return null;
 }
 
-/* ===== Login / Register ===== */
+/* ===== Login ===== */
 function showLoginTab(tab){
-  document.querySelectorAll('.login-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
-  $('ltab-login').style.display = tab==='login'?'block':'none';
-  $('ltab-register').style.display = tab==='register'?'block':'none';
+  // 教师端已关闭自助注册,仅保留登录
+  $('ltab-login').style.display = 'block';
   $('loginErr').style.display='none';
-  $('regErr').style.display='none';
 }
 function showErr(id, msg){
   const el = $(id);
@@ -668,22 +657,8 @@ async function doAdminLogin(){
   }
 }
 async function doAdminRegister(){
-  const u = $('regUser').value.trim();
-  const phone = $('regPhone').value.trim();
-  const p = $('regPass').value;
-  const p2 = $('regPass2').value;
-  const uErr = validU(u); if(uErr){ showErr('regErr', uErr); return; }
-  if(!/^1\d{10}$/.test(phone)){ showErr('regErr','手机号格式错误'); return; }
-  const pErr = validP(p); if(pErr){ showErr('regErr', pErr); return; }
-  if(p!==p2){ showErr('regErr','两次密码不一致'); return; }
-  try {
-    const r = await A.req('POST', '/api/auth/register', { username: u, password: p, phone, nickname: u, role: 'teacher' });
-    A.setAuth(r.account.username, r.token, 'teacher');
-    ADMIN = u;
-    enterAdmin();
-  } catch(e){
-    showErr('regErr', e.message || '注册失败');
-  }
+  // 教师端已关闭自助注册,仅管理员可开通账号
+  showErr('loginErr', '教师账号暂不开放自助注册,请联系管理员获取账号');
 }
 function enterAdmin(){
   setSession(ADMIN); // 持久化会话,刷新/重开浏览器自动登录

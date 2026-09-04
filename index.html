@@ -498,30 +498,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .upload-btn:hover{background:#3E36D4}
 #avatarEl.avatar-img{background-color:#F4F4FE;background-size:cover;background-position:center;text-indent:-9999px}
 
-/* ===== 登录页 ===== */
-#loginPage{position:absolute;inset:0;z-index:80;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;background:linear-gradient(160deg,#4F46E5 0%,#6D5FE8 55%,#7C6CF0 100%);overflow-y:auto}
+/* ===== 登录页(清新浅色主题,移除大视频背景) ===== */
+#loginPage{position:absolute;inset:0;z-index:80;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;background:linear-gradient(160deg,#F0F4FF 0%,#E8EEFC 45%,#F8FAFC 100%);overflow-y:auto}
 #loginPage>.login-logo,#loginPage>.login-title,#loginPage>.login-slogan,#loginPage>.login-box,#loginPage>.login-foot,#loginPage>.login-teacher-entry{position:relative;z-index:2}
-#loginBgDim{background:rgba(30,25,70,.32)}
-/* 手机端登录页:零流量轻动效(不上视频) */
+/* 手机端登录页:零流量轻动效 */
 .login-fx{display:none}
 @media (max-width:767px){
-  #loginPage{background:linear-gradient(160deg,#4F46E5,#6D5FE8,#7C6CF0,#5B4EE0);background-size:300% 300%;animation:loginGrad 14s ease-in-out infinite}
+  #loginPage{background:linear-gradient(160deg,#F0F4FF,#E8EEFC,#F8FAFC);background-size:300% 300%;animation:loginGrad 14s ease-in-out infinite}
   @keyframes loginGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-  .login-fx{display:block;position:absolute;color:rgba(255,255,255,.16);font-family:Georgia,serif;font-style:italic;z-index:1;pointer-events:none;animation:fxFloat 7s ease-in-out infinite}
+  .login-fx{display:block;position:absolute;color:rgba(79,70,229,.10);font-family:Georgia,serif;font-style:italic;z-index:1;pointer-events:none;animation:fxFloat 7s ease-in-out infinite}
   @keyframes fxFloat{0%,100%{transform:translateY(0) rotate(-4deg);opacity:.55}50%{transform:translateY(-16px) rotate(5deg);opacity:1}}
-  .login-box{background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 16px 44px rgba(20,18,38,.32)}
-  .login-logo{animation:logoGlow 3.4s ease-in-out infinite}
-  @keyframes logoGlow{0%,100%{text-shadow:0 0 0 rgba(255,255,255,0)}50%{text-shadow:0 0 22px rgba(255,255,255,.65)}}
+  .login-box{background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 16px 44px rgba(20,18,38,.10)}
 }
 @media (min-width:768px){
-  /* 桌面:登录卡靠左,右侧完整露出动态壁纸里的小人 */
+  /* 桌面:登录卡靠左,右侧留出装饰空间 */
   #loginPage{align-items:flex-start;justify-content:center;padding-left:7%}
-  #loginBgDim{background:linear-gradient(90deg,rgba(30,25,70,.52) 0%,rgba(30,25,70,.30) 45%,rgba(30,25,70,.06) 100%)}
 }
-.login-logo{font-size:52px;font-family:Georgia,serif;font-style:italic;color:#fff;opacity:.95;letter-spacing:4px;margin-bottom:10px}
-.login-title{font-size:26px;font-weight:800;color:#fff;letter-spacing:1px}
-.login-slogan{font-size:12.5px;color:rgba(255,255,255,.85);margin-top:8px;margin-bottom:28px;text-align:center;line-height:1.7}
-.login-box{width:100%;max-width:330px;background:#fff;border-radius:24px;padding:22px 20px;box-shadow:0 16px 40px rgba(20,18,38,.25)}
+.login-logo{font-size:52px;font-family:Georgia,serif;font-style:italic;color:var(--indigo);opacity:.95;letter-spacing:4px;margin-bottom:10px}
+.login-title{font-size:26px;font-weight:800;color:#1E1B32;letter-spacing:1px}
+.login-slogan{font-size:12.5px;color:#6B6F86;margin-top:8px;margin-bottom:28px;text-align:center;line-height:1.7}
+.login-box{width:100%;max-width:330px;background:#fff;border-radius:24px;padding:22px 20px;box-shadow:0 16px 40px rgba(20,18,38,.10)}
 .login-tabs{display:flex;background:#F4F4FE;border-radius:12px;padding:4px;margin-bottom:18px}
 .login-tab{flex:1;text-align:center;font-size:12.5px;padding:8px 0;border-radius:9px;color:var(--muted);cursor:pointer;font-weight:500}
 .login-tab.active{background:#fff;color:var(--indigo);font-weight:700;box-shadow:0 1px 4px rgba(30,27,50,.1)}
@@ -540,9 +536,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .login-alt{text-align:center;margin-top:14px;font-size:12px;color:var(--muted)}
 .login-alt a{color:var(--indigo);font-weight:600;text-decoration:none;cursor:pointer}
 .login-note{font-size:10.5px;color:var(--faint);text-align:center;margin-top:10px;line-height:1.6}
-.login-ghost{margin-top:18px;font-size:13px;color:rgba(255,255,255,.9);cursor:pointer;background:rgba(255,255,255,.16);border:.5px solid rgba(255,255,255,.4);border-radius:999px;padding:9px 26px}
+.login-ghost{margin-top:18px;font-size:13px;color:#4F46E5;cursor:pointer;background:#fff;border:.5px solid #C7D2FE;border-radius:999px;padding:9px 26px;box-shadow:0 2px 8px rgba(79,70,229,.08)}
 .login-ghost:active{opacity:.8}
-.login-foot{margin-top:22px;font-size:10px;color:rgba(255,255,255,.55);text-align:center;line-height:1.8}
+.login-foot{margin-top:22px;font-size:10px;color:#9CA3AF;text-align:center;line-height:1.8}
 .lcheck{display:flex;align-items:center;gap:6px;font-size:12px;color:#5B5E78;margin-top:6px;padding-left:2px;cursor:pointer}
 .lcheck input{cursor:pointer}
 .lerr{margin-top:6px;padding:7px 10px;background:#FFF1F1;border:1px solid #FECACA;color:#B91C1C;border-radius:8px;font-size:11.5px;line-height:1.5}
@@ -1142,8 +1138,6 @@ body.mock-exam #view-practice{position:fixed;inset:0;z-index:5000;background:#ff
 
   <!-- ============ 登录页 ============ -->
   <div id="loginPage">
-    <video id="loginBgVideo" autoplay muted loop playsinline onerror="loginVideoFailed()" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0"></video>
-    <div id="loginBgDim" style="position:absolute;inset:0;z-index:1"></div>
     <span class="login-fx" style="top:12%;left:8%;font-size:44px;animation-delay:0s">Σ</span>
     <span class="login-fx" style="top:22%;right:10%;font-size:34px;animation-delay:1.2s">∫</span>
     <span class="login-fx" style="top:55%;left:6%;font-size:30px;animation-delay:2.1s">π</span>
@@ -1151,7 +1145,7 @@ body.mock-exam #view-practice{position:fixed;inset:0;z-index:5000;background:#ff
     <span class="login-fx" style="top:40%;right:20%;font-size:24px;animation-delay:2.8s">x²</span>
     <span class="login-fx" style="bottom:28%;left:14%;font-size:26px;animation-delay:1.8s">ƒ</span>
     <div class="login-logo">Σ∫π</div>
-    <div class="login-title">AL 数学刷题</div>
+    <div class="login-title">AL数学刷题tool</div>
     <div class="login-slogan">Edexcel P1–P4 真题 · 583 道免费刷<br>自学 · 刷题 · 查漏补缺</div>
     <div class="login-box">
       <div class="login-tabs">
@@ -1949,7 +1943,6 @@ function logout(){
   window._autoLoggedOut = true;   // 防止本次页面内 tryAutoLogin 又把人登进去
   $('loginPage').style.display = 'flex';
   showLoginTab('pass');
-  try{ loadLoginVideo(); }catch(e){}
 }
 function switchAccount(){
   logout();
@@ -2007,18 +2000,7 @@ function showLoginTab(tab){
   $('ltab-reg').style.display  = tab==='reg'?'block':'none';
 }
 
-/* ===== 登录页动态壁纸:视频即背景(加载失败时回退渐变) ===== */
-function loginVideoFailed(){
-  var d = document.getElementById('loginBgDim');
-  if(d) d.style.display = 'none';
-}
-function loadLoginVideo(){
-  // 手机/小屏不加载 71MB 大视频(省流量,渐变背景同样好看);桌面才播动态壁纸
-  var v = document.getElementById('loginBgVideo');
-  if(!v) return;
-  if(window.innerWidth <= 768){ v.removeAttribute('src'); loginVideoFailed(); return; }
-  if(!v.getAttribute('src')) v.src = 'gura-bg.mp4';
-}
+/* ===== 登录页背景:已移除大视频,改用轻量渐变 + 数学符号浮动 ===== */
 
 /* ===== Modal: 编辑资料 / 头像 ===== */
 function editNick(){
@@ -4128,7 +4110,7 @@ function initApp(){
     setSession('');
     window.CURRENT_USER = '';
     const lp = $('loginPage');
-    if(lp){ lp.style.display='flex'; lp.style.zIndex='999'; try{ loadLoginVideo(); }catch(e){} }
+    if(lp){ lp.style.display='flex'; lp.style.zIndex='999'; }
     document.querySelectorAll('.page').forEach(p=>{ p.style.display=''; });
     if(typeof showLoginTab === 'function') showLoginTab('pass');
     if(typeof resetS === 'function') resetS();
