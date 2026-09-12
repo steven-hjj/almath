@@ -187,7 +187,14 @@ function toastMsg(msg) {
 }
 
 /* ==================== 四、云服务客户端（免密钥） ==================== */
-var _client = null, _model = null, _initPromise = null, _initErr = '';
+var _client = null, _model = null, _initPromise = null, _initErr = '', _modelErr = '';
+
+// 云服务按域名白名单做跨域校验:只有本应用的腾讯云发布域名能调通。
+// 其它域名(如 GitHub Pages 镜像)打开时,模型列表会以 "Failed to fetch" 失败,
+// 这种情况要给出明确引导,而不是让学生看到一句看不懂的报错。
+function onCloudDomain() {
+  try { return location.host === new URL(ENDPOINT).host; } catch (e) { return false; }
+}
 
 function ensureClient() {
   if (_client) return Promise.resolve(_client);
@@ -213,7 +220,11 @@ function ensureClient() {
             _model = ok[0] || null;
             resolve(_client);
           })
-          .catch(function () { _model = null; resolve(_client); });
+          .catch(function (e) {
+            _model = null;
+            _modelErr = (e && e.error && e.error.code) || (e && e.message) || 'unknown';
+            resolve(_client);
+          });
         return;
       }
       waited += 200;
@@ -268,7 +279,7 @@ function buildQuestionPrompt(q, chapter) {
 var st = {
   qid: '', q: null, chapter: '', qprompt: '',
   text: '', streaming: false, controller: null,
-  history: [], followupUsed: 0, cacheHit: false, err: ''
+  history: [], followupUsed: 0, cacheHit: false, err: '', blocked: false
 };
 
 function box() { return document.getElementById('aiTeachBox'); }
@@ -298,6 +309,17 @@ function paint(streaming) {
 
 function paintNow(streaming) {
   var b = box(); if (!b) return;
+
+  // 当前域名不在云服务白名单里(例如 GitHub Pages 镜像站):给出明确引导,而不是看不懂的报错
+  if (st.blocked) {
+    b.innerHTML = '<div class="ai-card">'
+      + '<div class="ai-head"><span class="ai-title">🤖 AI 讲题</span><span class="ai-badge err">此地址不可用</span></div>'
+      + '<div class="ai-body">AI 讲题需要在本应用的<b>腾讯云地址</b>下打开（AI 服务按域名校验，腾讯云线路国内速度也更快）。</div>'
+      + '<button class="ai-btn" style="margin-top:12px" onclick="window.open(\'' + ENDPOINT + '\',\'_blank\')">前往腾讯云地址 →</button>'
+      + '</div>';
+    return;
+  }
+
   var body = st.text ? renderTeach(st.text, streaming) : '';
   var head = '';
   if (st.cacheHit) {
@@ -349,7 +371,7 @@ function ask() {
   // 切题 → 清空上一题状态
   if (st.qid !== qid) {
     st.qid = qid; st.q = q; st.chapter = cur.chapter;
-    st.text = ''; st.history = []; st.followupUsed = 0; st.err = '';
+    st.text = ''; st.history = []; st.followupUsed = 0; st.err = ''; st.blocked = false;
     st.qprompt = buildQuestionPrompt(q, cur.chapter);
   }
 
@@ -378,7 +400,7 @@ function regen() {
   if (!cur) { toastMsg('先打开一道题'); return; }
   var qid = hashQ(cur.q);
   if (st.qid !== qid) { ask(); return; }
-  st.cacheHit = false; st.text = ''; st.history = []; st.followupUsed = 0; st.err = '';
+  st.cacheHit = false; st.text = ''; st.history = []; st.followupUsed = 0; st.err = ''; st.blocked = false;
   if (quotaLeft() <= 0) {
     st.err = '今天的额度用完了，明天再来';
     paint(false); return;
@@ -426,8 +448,14 @@ function runStream(userMsgs, isFirst) {
     if (!client) throw new Error('no-client');
     if (!_model) {
       st.streaming = false;
-      st.err = '当前没有可用的 AI 模型，请稍后再试';
       if (isFirst) st.text = '';
+      if (_modelErr && /network|fetch|cors|gateway|failed/i.test(_modelErr) && !onCloudDomain()) {
+        st.blocked = true; st.err = '';
+      } else if (_modelErr) {
+        st.err = 'AI 服务暂时不可用，稍后再试';
+      } else {
+        st.err = '当前没有可用的 AI 模型，请稍后再试';
+      }
       paint(false);
       return;
     }
@@ -508,7 +536,7 @@ window.AITeach = {
   left: quotaLeft,
   reset: function () {
     st.qid = ''; st.q = null; st.text = ''; st.history = [];
-    st.followupUsed = 0; st.cacheHit = false; st.err = ''; st.streaming = false;
+    st.followupUsed = 0; st.cacheHit = false; st.err = ''; st.streaming = false; st.blocked = false;
   }
 };
 
