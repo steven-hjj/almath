@@ -1,11 +1,12 @@
 // 极简 Service Worker：缓存静态资源，让二次访问秒开
 // 仅缓存 data / 图片。HTML / admin.html 不缓存(保证刷新拿到最新版本)
-const CACHE = 'almath-v6';
+const CACHE = 'almath-v7';
 const ASSETS = [
   './data-P1.js',
   './data-P2.js',
   './data-P3.js',
   './data-P4.js',
+  './ai-teach.js',
   './sponsor-qr.jpg'
 ];
 

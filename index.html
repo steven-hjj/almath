@@ -1199,6 +1199,8 @@ body.mock-exam #view-practice{position:fixed;inset:0;z-index:5000;background:#ff
 <script src="data-P3.js" defer></script>
 <script src="data-P4.js" defer></script>
 <script src="db.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js" defer></script>
+<script src="ai-teach.js" defer></script>
 <script>
 // 老设备兼容 polyfill(padStart/padEnd)
 if(!String.prototype.padStart){String.prototype.padStart=function(t,s){s=String(s||" ");var L=this.length;return L>=t?this:String(s).slice(0,Math.max(0,t-L))+this;};}
@@ -2804,8 +2806,8 @@ function confirmOpt(){
     if(right) S.chapterProgress[p.chapter.id].correct = (S.chapterProgress[p.chapter.id].correct||0) + 1;
   }
 
-  // 解析
-  $('analysisBox').innerHTML=`<div class="analysis"><b>${right?'✓ 回答正确':'✗ 回答错误'+(p.battle?' · 扣血 1':'')}</b>　正确答案：${'ABCD'[q.a]}<br><br>${q.exp}</div>`;
+  // 解析 + AI 讲题入口
+  $('analysisBox').innerHTML=`<div class="analysis"><b>${right?'✓ 回答正确':'✗ 回答错误'+(p.battle?' · 扣血 1':'')}</b>　正确答案：${'ABCD'[q.a]}<br><br>${q.exp}</div><div class="ai-entry"><button class="ai-btn" onclick="AITeach.ask()">🤖 AI 讲透这道题</button><span class="ai-tip" id="aiTip">考点 · 思路 · 每一步为什么这么做 · 易错点</span></div><div id="aiTeachBox"></div>`;
   const old = $('view-practice').querySelector('.q-actions');
   if(old) old.remove();
   const act = document.createElement('div');

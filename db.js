@@ -65,6 +65,12 @@ function mergeDatabases(local, cloud) {
       merged[t] = mergeTable((local||{})[t] || {}, (cloud||{})[t] || {}, r => Date.parse(r.time || '') || 0);
       continue;
     }
+    if (t === 'aiTeach') {
+      // AI 讲解缓存:按记录级时间戳合并。多台设备各自生成的讲解都能保留,
+      // 不会被整表覆盖(否则后生成的设备会把别人生成的讲解冲掉)
+      merged[t] = mergeTable((local||{})[t] || {}, (cloud||{})[t] || {}, r => r.ts || 0);
+      continue;
+    }
     const lt = (local||{})[t] || {}, ct = (cloud||{})[t] || {};
     merged[t] = ((ct._ts || 0) > (lt._ts || 0)) ? ct : lt;
   }
