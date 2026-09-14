@@ -321,6 +321,12 @@ function paintNow(streaming) {
   }
 
   var body = st.text ? renderTeach(st.text, streaming) : '';
+  // 首字到达前给等待反馈:首次生成要 1~2 分钟,不说明白学生会以为坏了
+  if (!body && st.streaming && !st.cacheHit) {
+    body = '<div class="ai-wait">AI 正在读题、撰写讲解<span class="ai-dots"></span><br>'
+      + '首次讲解通常需要 <b>1–2 分钟</b>，请先别关页面。讲解生成后会存下来，'
+      + '<b>全班同学再看这道题就是秒出</b>。</div>';
+  }
   var head = '';
   if (st.cacheHit) {
     head = '<span class="ai-badge cache">⚡ 秒出 · 这题已有同学问过</span>';
@@ -543,6 +549,10 @@ window.AITeach = {
 /* ==================== 九、样式注入 ==================== */
 (function injectCSS() {
   var css = ''
+    + '.ai-wait{font-size:12.5px;color:#5B5F73;line-height:1.95;background:#F7F8FF;border:1px solid #E4E6F5;border-radius:12px;padding:13px 15px}'
+    + '.ai-wait b{color:#4338CA}'
+    + '.ai-dots::after{content:"";animation:aiDots 1.6s steps(1,end) infinite}'
+    + '@keyframes aiDots{0%{content:""}25%{content:"·"}50%{content:"··"}75%{content:"···"}}'
     + '.ai-entry{margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}'
     + '.ai-btn{border:none;border-radius:12px;padding:11px 18px;font-size:13.5px;font-weight:700;font-family:inherit;cursor:pointer;'
     + 'color:#fff;background:linear-gradient(135deg,#4F46E5,#7C6CF0);box-shadow:0 6px 16px rgba(79,70,229,.28)}'
